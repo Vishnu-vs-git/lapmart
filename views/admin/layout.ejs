@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body class="bg-gray-900 text-white">
+  <!-- Sidebar -->
+  <div class="flex">
+    <aside class="w-64 bg-gray-800 h-screen">
+      <div class="p-4 text-2xl font-bold">
+        LapMart
+      </div>
+      <nav class="mt-10">
+        <a href="/admin/dashboard" class="block py-2.5 px-4 hover:bg-gray-700">Dashboard</a>
+        <a href="/admin/products" class="block py-2.5 px-4 hover:bg-gray-700">Products</a>
+        <a href="/admin/customers" class="block py-2.5 px-4 hover:bg-gray-700">Customers</a>
+        <a href="/admin/orders" class="block py-2.5 px-4 hover:bg-gray-700">Orders</a>
+        <a href="/admin/coupons" class="block py-2.5 px-4 hover:bg-gray-700">Coupons</a>
+        <!-- Add other sidebar links here -->
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <div class="flex-1">
+      <header class="bg-gray-800 p-4 flex justify-between items-center">
+        <span class="text-lg">Admin</span>
+        <a href="/admin/logout" class="text-blue-400">Logout</a>
+      </header>
+      
+      <main class="p-6">
+        <%- body %>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

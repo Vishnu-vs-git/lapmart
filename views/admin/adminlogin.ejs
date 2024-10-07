@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login - LapMart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #1c1b27;
+    }
+    .login-box {
+      background-color: #000;
+    }
+    .btn-login {
+      background-color: #0a043c;
+    }
+    .btn-login:hover {
+      background-color: #2a1d87;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+  
+  <!-- Logo and Sign In/Sign Up -->
+  <div class="absolute top-5 left-10 text-white font-bold text-4xl">
+    LapMart
+  </div>
+  <div class="absolute top-5 right-10 text-white">
+    <a href="#" class="hover:underline">Sign Up/Sign In</a>
+  </div>
+
+  <!-- Login Form -->
+  <div class="login-box rounded-lg p-8 shadow-lg max-w-md w-full">
+    <h2 class="text-white text-center text-2xl font-bold mb-6">ADMIN LOGIN</h2>
+    <form id="adminLoginForm" action="/admin/login" method="POST">
+      <div class="mb-4">
+        <label for="email" class="block text-white">Enter Email</label>
+        <input type="email" id="email" name="email" class="w-full p-2 mt-1 rounded-lg border-none bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <small id="emailError" class="text-red-500 hidden">Please enter a valid email.</small>
+      </div>
+      <div class="mb-6">
+        <label for="password" class="block text-white">Password</label>
+        <input type="password" id="password" name="password" class="w-full p-2 mt-1 rounded-lg border-none bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <small id="passwordError" class="text-red-500 hidden">Password must be at least 6 characters long.</small>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn-login text-white py-2 px-6 rounded-lg text-lg hover:bg-blue-700">LOGIN</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Access form elements
+    const form = document.getElementById('adminLoginForm');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const emailError = document.getElementById('emailError');
+    const passwordError = document.getElementById('passwordError');
+
+    // Email format validation using a simple regular expression
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    // Main form validation logic
+    form.addEventListener('submit', function(event) {
+      let isValid = true; // Assume form is valid initially
+
+      // Reset error messages
+      emailError.classList.add('hidden');
+      passwordError.classList.add('hidden');
+
+      // Check if the email is empty or not valid
+      if (email.value === '' || !isValidEmail(email.value)) {
+        emailError.textContent = 'Please enter a valid email.';
+        emailError.classList.remove('hidden');
+        isValid = false; // Mark form as invalid
+      }
+
+      // Check if the password is too short
+      if (password.value === '' || password.value.length < 6) {
+        passwordError.textContent = 'Password must be at least 6 characters long.';
+        passwordError.classList.remove('hidden');
+        isValid = false; // Mark form as invalid
+      }
+
+      // If form is not valid, prevent submission
+      if (!isValid) {
+        event.preventDefault();
+      }
+    });
+  </script>
+
+</body>
+</html>

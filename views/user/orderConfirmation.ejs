@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmation</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-r from-white via-gray-200 to-white-500   ">
+  
+  <!-- Header/Navbar Section -->
+  <%- include('../partials/header') %>
+  <%- include('../partials/navbar') %>
+   <div class="flex justify-center mb-8 mt-6">
+  <div class="bg-white text-gray-800 p-8 md:p-12 rounded-2xl shadow-2xl max-w-md w-full text-center transform hover:scale-105 transition duration-500">
+    <div class="text-blue-500 text-6xl mb-4">
+      <i class="fas fa-check-circle">✔</i>
+    </div>
+    <h1 class="text-4xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-teal-400">Thank You!</h1>
+    <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-700">Your Order Has Been Successfully Placed!</h2>
+    <p class="mb-4 text-gray-600">Your order number is <strong class="text-purple-600"><%=order.orderId %></strong>.</p>
+    <p class="mb-8 text-gray-600">We will process your order and deliver it within 2 - 5 business days.</p>
+    <div class="flex justify-center space-x-6">
+      <a href="/userOrders" class="px-6 py-2 rounded-full bg-blue-500 text-white font-semibold shadow-md hover:bg-blue-600 transition">My Orders</a>
+      <a href="/home" class="px-6 py-2 rounded-full bg-teal-400 text-black font-semibold shadow-md hover:bg-teal-500 transition">Continue Shopping</a>
+    </div>
+  </div>
+</div>
+  <%- include('../partials/footer') %>
+
+</body>
+</html>

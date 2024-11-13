@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapMart - Product Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <%- include('../partials/adminLoginIcon') %>
+            
+            <h1 class="text-4xl font-bold text-orange-400 mb-4">Product Listing</h1>
+
+            <!-- Search Option -->
+            <div class="mb-4">
+                <form action="/admin/searchProduct" method="GET" class="flex">
+                    <input type="text" name="query" placeholder="Search Product" class="flex-grow px-4 py-2 rounded-l-lg text-black">
+                    <button type="submit" class="bg-blue-500 px-4 py-2 rounded-r-lg text-black">Search</button>
+                </form>
+            </div>
+            <!--  addproduct  -->
+            <div class="mt-4 mb-4">
+                <a href="/admin/addProduct" class="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-600">Add New Product</a>
+            </div>
+
+            <!-- Product Table -->
+            <table class="min-w-full bg-gray-800 rounded-lg">
+                <thead>
+                    <tr class="w-full bg-gray-700 text-left">
+                        <th class="px-4 py-2">S.l no</th>
+                        <th class="px-4 py-2">Product Name</th>
+                        <th class="px-4 py-2">Price</th>
+                        <th class="px-4 py-2">Stock</th>
+                        <th class="px-4 py-2">Category</th>
+                        <th class="px-4 py-2">Status</th>
+                        <th class="px-4 py-4 text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach((product, index) => { %>
+                        <tr class="border-b border-gray-700">
+                            <td class="px-4 py-2"><%= index + 1 %></td>
+                            <td class="px-4 py-2"><%= product.name %></td>
+                            <td class="px-4 py-2">₹ <%= product.price %></td>
+                            <td class="px-4 py-2"><%= product.quantity > 0 ? product.quantity : 'Out of Stock' %></td>
+                            <td class="px-4 py-2"><%= product.category %></td>
+                            <td class="px-4 py-2"><%= product.status === 'Active' ? 'Active' : 'Inactive' %></td>
+                            <td>
+                                <div class="flex items-center justify-center px-2">
+                                    <!-- Block/Unblock Button -->
+                                    <button 
+                                        onclick="confirmBlockUnblock('<%= product._id %>', '<%= product.status %>')" 
+                                        class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
+                                        <%= product.status === 'Active' ? 'Block' : 'Unblock' %>
+                                    </button>
+                                    <!-- Edit Button -->
+                                    <a href="/admin/editProduct/<%= product._id %>" class="bg-blue-500 ml-2 text-white px-3 py-1 rounded hover:bg-blue-600">Edit</a>
+                                    <!-- Delete Button -->
+                                    <button 
+                                        onclick="confirmDelete('<%= product._id %>')" 
+                                        class="bg-red-500 ml-2 text-white px-3 py-1 rounded hover:bg-red-600">
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+
+           
+        </div>
+    </div>
+
+    <!-- SweetAlert Script -->
+    <script>
+        function confirmBlockUnblock(productId, currentStatus) {
+            const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+            const confirmationText = newStatus === 'Active' ? 'unblock' : 'block';
+
+            Swal.fire({
+                title: 'Confirmation',
+                text: `Are you sure you want to ${confirmationText} this product?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to block/unblock route
+                    window.location.href = `/admin/Product/${newStatus.toLowerCase()}/${productId}`;
+                }
+            });
+        }
+
+        function confirmDelete(productId) {
+            Swal.fire({
+                title: 'Delete Product',
+                text: 'Are you sure you want to delete this product?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to the delete product route
+                    window.location.href = `/admin/deleteProduct/${productId}`;
+                }
+            });
+        }
+
+        <% if (message) { %>
+    const messageType = '<%= message.type %>';
+    const messageText = '<%= message.text %>';
+    const alertIcon = messageType === 'success' ? 'success' : 'error';
+
+    Swal.fire({
+        icon: alertIcon,
+        title: messageText,
+        showConfirmButton: true
+    });
+<% } %>
+
+    </script>
+</body>
+</html>

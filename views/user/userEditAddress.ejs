@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .break {
+            background: #E4DCCF;
+        }
+        .break2 {
+            background: #FFBE98;
+        }
+        .break3 {
+            background: #FFF5E4;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header/Navbar Section -->
+    <%-include('../partials/header') %>
+    <%-include('../partials/navbar') %>
+
+    <div class="w-screen flex">
+        <% if (success) { %>
+            <div class="alert alert-success"><%= success %></div>
+        <% } %>
+        <% if (error) { %>
+            <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+
+        <%- include('../partials/modifiedUsidebar') %>
+
+        <div id="messageContainer" class="hidden fixed top-4 right-4 bg-red-200 text-red-800 p-4 rounded-lg shadow-lg"></div>
+        
+        <!-- Profile Form Section -->
+        <div class="w-3/4 p-8 break rounded-lg shadow-md border-2 border-black ml-4">
+            <h2 class="text-xl font-bold mb-6 text-center">Edit Address</h2>
+          
+            <form name="userAddressForm" class="break3 p-6 rounded shadow-md font-bold border-2 border-black" onsubmit="validateForm(event)" action="/user/editAddress/<%=address._id %>" method="post">
+                <div class="mb-4">
+                    <label class="block mb-1">Name</label>
+                    <input type="text" name="userName" value="<%=address.userName %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter name">
+                    <span id="userNameError" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">AddressLine1</label>
+                    <input type="text" name="addressLine1" value="<%=address.addressLine1 %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter address line 1">
+                    <span id="addressLine1Error" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">AddressLine2</label>
+                    <input type="text" name="addressLine2" value="<%=address.addressLine2 %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter address line 2">
+                    <span id="addressLine2Error" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">Street</label>
+                    <input type="text" name="street" value="<%=address.street %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter street">
+                    <span id="streetError" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">City</label>
+                    <input type="text" name="city" value="<%=address.city %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter city">
+                    <span id="cityError" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">State</label>
+                    <input type="text" name="state" value="<%=address.state %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter state">
+                    <span id="stateError" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">Country</label>
+                    <input type="text" name="country" value="<%=address.country %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter country">
+                    <span id="countryError" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">Zip Code</label>
+                    <input type="text" name="zipCode" value="<%=address.zipCode %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter zip code">
+                    <span id="zipCodeError" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1">Phone</label>
+                    <input type="text" name="phoneNo" value="<%=address.phoneNo %>" class="w-full p-2 border border-gray-900 rounded" placeholder="Enter phone number">
+                    <span id="phoneError" class="hidden text-red-600 text-sm mt-1"></span>
+                </div>
+                <div class="flex justify-center items-center">
+                    <button type="submit" class="bg-green-500 text-white font-bold px-8 py-2 rounded">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+ 
+    <script>
+        function validateForm(event) {
+            event.preventDefault(); // Prevent form from submitting
+        
+            let isValid = true;
+        
+            // Regular expressions
+            const capitalLetterRegex = /^[A-Z].*/; // Checks if the first letter is uppercase
+            const phoneRegex = /^[0-9]{10}$/; // Phone number must be exactly 10 digits
+            const zipCodeRegex = /^[0-9]{6}$/; // Zip code must be exactly 6 digits
+        
+            // Get form elements and corresponding error spans
+            const fields = {
+                userName: document.forms["userAddressForm"]["userName"],
+                addressLine1: document.forms["userAddressForm"]["addressLine1"],
+                addressLine2: document.forms["userAddressForm"]["addressLine2"],
+                street: document.forms["userAddressForm"]["street"],
+                city: document.forms["userAddressForm"]["city"],
+                state: document.forms["userAddressForm"]["state"],
+                country: document.forms["userAddressForm"]["country"],
+                zipCode: document.forms["userAddressForm"]["zipCode"],
+                phoneNo: document.forms["userAddressForm"]["phoneNo"],
+            };
+        
+            const errorSpans = {
+                userName: document.getElementById('userNameError'),
+                addressLine1: document.getElementById('addressLine1Error'),
+                addressLine2: document.getElementById('addressLine2Error'),
+                street: document.getElementById('streetError'),
+                city: document.getElementById('cityError'),
+                state: document.getElementById('stateError'),
+                country: document.getElementById('countryError'),
+                zipCode: document.getElementById('zipCodeError'),
+                phoneNo: document.getElementById('phoneError'),
+            };
+        
+            // Clear previous error messages
+            Object.values(errorSpans).forEach(span => {
+                span.textContent = '';
+                span.classList.add('hidden');
+            });
+        
+            // Validate each field
+            for (const [fieldName, fieldElement] of Object.entries(fields)) {
+                const fieldValue = fieldElement.value.trim();
+                if (!fieldValue) {
+                    errorSpans[fieldName].textContent = `${fieldName} is required.`;
+                    errorSpans[fieldName].classList.remove('hidden');
+                    isValid = false;
+                } else if (!capitalLetterRegex.test(fieldValue) && fieldName !== 'zipCode' && fieldName !== 'phoneNo') {
+                    errorSpans[fieldName].textContent = `${fieldName} must start with a capital letter.`;
+                    errorSpans[fieldName].classList.remove('hidden');
+                    isValid = false;
+                }
+            }
+        
+            // Validate Zip Code
+            if (!zipCodeRegex.test(fields.zipCode.value.trim())) {
+                errorSpans.zipCode.textContent = 'Zip code must be exactly 6 digits.';
+                errorSpans.zipCode.classList.remove('hidden');
+                isValid = false;
+            }
+        
+            // Validate Phone Number
+            if (!phoneRegex.test(fields.phoneNo.value.trim())) {
+                errorSpans.phoneNo.textContent = 'Phone number must be exactly 10 digits.';
+                errorSpans.phoneNo.classList.remove('hidden');
+                isValid = false;
+            }
+        
+            // Show success alert if valid
+            if (isValid) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Profile Updated',
+                    text: 'Your address has been successfully updated',
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then(() => {
+                    event.target.submit(); // Submit the form if valid
+                });
+            }
+        }
+    </script>
+</body>
+</html>

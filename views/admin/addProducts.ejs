@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapMart - Add Products</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+        <div class="flex-1 p-8">
+            <%- include('../partials/adminLoginIcon') %>
+            <h1 class="text-4xl font-bold text-orange-400 mb-4">Add Products</h1>
+            <% if (message) { %>
+                <div id="message" class="mt-4 text-center <%= message.type === 'error' ? 'text-red-500' : 'text-green-500' %> bg-gray-700 p-2 rounded">
+                    <%= message.text %>
+                </div>
+            <% } %>
+            <form id="productForm" action="/admin/addProduct" method="POST">
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label for="name">Product Name</label>
+                        <input type="text" id="productName" name="name" class="w-full border text-black" >
+                    </div>
+                    <div>
+                        <label for="price">Product Price</label>
+                        <input type="number" id="productPrice" name="price" class="w-full border text-black" >
+                    </div>
+                    <div>
+                        <label for="quantity">Product Quantity</label>
+                        <input type="number" id="productQuantity" name="quantity" class="w-full border text-black" >
+                    </div>
+                    
+                    <div>
+                        <label for="category">Product Category</label>
+                        <select id="productCategory" name="category" class="w-full border text-black">
+                            <option value="">Select Category</option>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>"><%= category.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                       <!-- Discount Fields -->
+                       <div>
+                        <label for="discountType">Discount Type</label>
+                        <select id="discountType" name="discountType" class="w-full border text-black">
+                            <option value="">Select Discount Type</option>
+                            <option value="fixed">Fixed</option>
+                            <option value="percentage">Percentage</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="discountValue">Discount Value</label>
+                        <input type="number" id="discountValue" name="discountValue" class="w-full border text-black" placeholder="Enter discount value">
+                    </div>
+                    <div>
+                        <label for="discountValue">featured</label>
+                        <input type="text" id="isfeatured" name="isfeatured" class="w-full border text-black" placeholder="Enter isfeatured">
+                    </div>
+
+                    
+                    <div>
+                        <label for="description">Product description</label>
+                        <input type="text" id="productDescription" name="description" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="processor">Product processor</label>
+                        <input type="text" id="productProcessor" name="processor" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="processorGeneration">Product processor generation</label>
+                        <input type="text" id="processorGeneration" name="processorGeneration" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="ramCapacity">Product ram capacity</label>
+                        <input type="text" id="ramCapacity" name="ramCapacity" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="ramGeneration">Product ram generation</label>
+                        <input type="text" id="ramGeneration" name="ramGeneration" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="storageType">Product storage type</label>
+                        <input type="text" id="storageType" name="storageType" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="weight">Product weight</label>
+                        <input type="text" id="productWeight" name="weight" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="touchScreen">Touchscreen</label>
+                        <input type="text" id="touchScreen" name="touchScreen" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="operatingSystem">Product operating system</label>
+                        <input type="text" id="operatingSystem" name="operatingSystem" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="graphicsType">Product graphics type</label>
+                        <input type="text" id="graphicsType" name="graphicsType" class="w-full border text-black">
+                    </div>
+                  <!-- Key Features Fields -->
+                 <div id="keyFeaturesFields" class="col-span-3">
+                   <label for="keyFeatures">Product Key Features</label>
+                 <div>
+                    <input type="text" name="keyFeatures[]" class="w-full border text-black" placeholder="Enter a key feature">
+                      </div>
+                  </div>
+                       <button type="button" id="addKeyFeatureButton" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Add Another Key Feature</button>
+
+
+                    <!-- Color Fields for Multiple Colors -->
+                    <div id="colorFields" class="col-span-3">
+                        <label for="color">Product Colors</label>
+                        <div>
+                            <input type="text" name="color[]" class="w-full border text-black" placeholder="Enter a color">
+                        </div>
+                    </div>
+                    <button type="button" id="addColorButton" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Add Another Color</button>
+
+                    <!-- Image Upload -->
+                    <div class="col-span-3">
+                        <label>Product Images (Upload one by one)</label>
+                        <input type="file" id="productImage" accept="image/*" class="w-full border">
+                        <button type="button" id="cropButton" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Crop & Upload</button>
+                        <div id="imagePreview" class="grid grid-cols-4 gap-4 mt-4"></div>
+                    </div>
+
+                    <div class="col-span-3 text-center mb-20">
+                        <button type="submit" id="submitBtn" class="bg-green-500 text-white px-4 py-2 rounded" disabled>Add Product</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cropper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+    <script>
+        let cropper = null;
+        let croppedImages = [];
+        const imagePreview = document.getElementById('imagePreview');
+        const productImages = document.getElementById('productImage');
+        const submitBtn = document.getElementById('submitBtn');
+        const cropButton = document.getElementById('cropButton');
+
+        productImages.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('w-full', 'h-48', 'object-cover');
+
+                imagePreview.innerHTML = ''; 
+                imagePreview.appendChild(img);
+
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                img.onload = function () {
+                    cropper = new Cropper(img, {
+                        aspectRatio: NaN, // Free aspect ratio, no fixed aspect ratio
+                        viewMode: 1, // Show full image within the container
+                         // Ensure the entire image is covered by the crop box initially
+                    });
+                };
+            }
+        });
+
+        cropButton.addEventListener('click', async function () {
+            if (!cropper) return alert('Please select an image first!');
+
+            // Get the cropped area dimensions from Cropper
+            const canvas = cropper.getCroppedCanvas();
+
+            canvas.toBlob(async function (blob) {
+                let formData = new FormData();
+                formData.append('file', blob);
+                formData.append('upload_preset', 'vishnu');
+                formData.append('api_key', '385746979633158');
+
+                try {
+                    const response = await fetch('https://api.cloudinary.com/v1_1/dzypi6gbs/image/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    croppedImages.push(data.secure_url);
+
+                    cropper.destroy();
+                    cropper = null;
+                    productImages.value = '';
+
+                    imagePreview.innerHTML = '';
+                    croppedImages.forEach(url => {
+                        const imgPreview = document.createElement('img');
+                        imgPreview.src = url;
+                        imgPreview.classList.add('w-full', 'h-48', 'object-cover');
+                        imagePreview.appendChild(imgPreview);
+                    });
+
+                    if (croppedImages.length >= 3) {
+                        submitBtn.disabled = false;
+                    }
+
+                } catch (error) {
+                    console.error('Image upload failed:', error);
+                    alert('Image upload failed: ' + error.message);
+                }
+            });
+        });
+
+        document.getElementById('productForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            if (croppedImages.length === 0) {
+                alert("Please upload and crop at least one image.");
+                return;
+            }
+
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'croppedImages';
+            hiddenInput.value = JSON.stringify(croppedImages);
+
+            this.appendChild(hiddenInput);
+            this.submit();
+        });
+
+        // Color Fields Logic
+        // document.getElementById('addColorButton').addEventListener('click', function () {
+        //     const colorFields = document.getElementById('colorFields');
+        //     const newColorInput = document.createElement('input');
+        //     newColorInput.type = 'text';
+        //     newColorInput.name = 'color[]';
+        //     newColorInput.placeholder = 'Enter a color';
+        //     newColorInput.classList.add('w-full', 'border', 'text-black', 'mt-2');
+        //     colorFields.appendChild(newColorInput);
+        // });
+
+
+
+        
+// Dynamic color fields
+const colorFields = document.getElementById('colorFields');
+const addColorButton = document.getElementById('addColorButton');
+
+addColorButton.addEventListener('click', function() {
+    const newColorField = document.createElement('div');
+    newColorField.innerHTML = `
+        <input type="text" name="color[]" class="w-full border text-black mt-2" placeholder="Enter a color">
+    `;
+    colorFields.appendChild(newColorField);
+});
+
+// Dynamic key features fields
+const keyFeaturesFields = document.getElementById('keyFeaturesFields');
+const addKeyFeatureButton = document.getElementById('addKeyFeatureButton');
+
+addKeyFeatureButton.addEventListener('click', function() {
+    const newKeyFeatureField = document.createElement('div');
+    newKeyFeatureField.innerHTML = `
+        <input type="text" name="keyFeatures[]" class="w-full border text-black mt-2" placeholder="Enter a key feature">
+    `;
+    keyFeaturesFields.appendChild(newKeyFeatureField);
+});
+
+
+
+
+
+    </script>
+</body>
+</html>
+
+
+
+
+

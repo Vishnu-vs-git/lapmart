@@ -1,35 +1,44 @@
 const mongoose=require('mongoose')
+const addressSchema=require('./addressSchema')
 const userSchema=mongoose.Schema({
-  firstName:{
+  userName:{
     type:String,
-    required:true,
-    trim:true
-  },lastName:{
-    type:String,
-    required:true,
+    required:false,
     trim:true
   },email:{
     type:String,
-    required:true,
+    required:false,
     trim:true,
-    unique:true
+   
   },phone:{
     type:String,
-    required:true,
+    required:false,
     trim:true
   },password:{
-    type:'String',
-    required:true,
+    type:String,
+    required:false,
 
-  },address:{
-      type:addressSchema,
-      required:true
-
-  },isBlocked:{
-       type:String,
-       default:'unblocked'
+  },address: [{
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Address', 
+  }],
+  status:{
+    type:String,
+    enum:['Active','Inactive'],
+    default:'Active'
+  },
+  userUsage: [
+    {
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      count: { type: Number, default: 0 },
+    },
+  ],
+  isBlocked:{
+       type:Boolean,
+       default:'false'
   },googleId:{type:String},
 
   
 },{timestamps:true});
-module.exports=mongoose.model('user',userSchema);
+const User=mongoose.model('User',userSchema);
+module.exports=User

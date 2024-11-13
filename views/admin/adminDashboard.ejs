@@ -1,131 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Customers</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LapMart Admin Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #1c1b27;
+    }
+
+    .sidebar {
+      background-color: #2d2b3a;
+    }
+
+    .card {
+      background-color: #181621;
+    }
+
+    .positive {
+      color: #22c55e;
+    }
+
+    .negative {
+      color: #ef4444;
+    }
+  </style>
 </head>
-<body class="bg-gray-900 text-white font-sans">
+<body class="min-h-screen flex">
 
-    <!-- Sidebar -->
-    <div class="flex">
-        <aside class="w-64 bg-gray-800 h-screen flex flex-col">
-            <div class="text-center py-6">
-                <h1 class="text-3xl font-bold text-white">LapMart</h1>
-            </div>
-            <nav class="mt-10 flex-1 px-4">
-                <ul>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-tachometer-alt"></i></span> Dashboard
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-box"></i></span> Products
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-users"></i></span> Customers
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-shopping-cart"></i></span> Orders
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-tag"></i></span> Coupons
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-list-alt"></i></span> Category
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-percent"></i></span> Discounts
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-image"></i></span> Banner
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-chart-bar"></i></span> Sales Report
-                        </a>
-                    </li>
-                    <li class="mb-4">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-200 hover:bg-gray-700">
-                            <span class="mr-2"><i class="fas fa-sign-out-alt"></i></span> Logout
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
+  <!-- Sidebar -->
+  <aside class="sidebar w-64 h-screen p-5 flex flex-col text-white">
+    <div class="text-4xl font-bold mb-8">LapMart</div>
+    <nav class="flex-1 space-y-4">
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Dashboard</span>
+      </a>
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Products</span>
+      </a>
+      <a href='/admin/customers' class="block text-lg flex items-center">
+        <span class="ml-4">Customers</span>
+      </a>
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Orders</span>
+      </a>
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Coupons</span>
+      </a>
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Category</span>
+      </a>
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Discounts</span>
+      </a>
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Banner</span>
+      </a>
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Sales Report</span>
+      </a>
+      <a href="#" class="block text-lg flex items-center">
+        <span class="ml-4">Logout</span>
+      </a>
+    </nav>
+  </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 p-10">
-            <!-- Customer Management Section -->
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold">Customers</h2>
-                <div class="relative">
-                    <input type="text" placeholder="Search" class="bg-gray-700 text-white px-4 py-2 rounded-md">
-                </div>
-            </div>
+  <!-- Main Content -->
+  <div class="flex-1 p-6">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-3xl font-bold text-white">Sales Summary</h1>
+      
+      <div class="flex items-center space-x-4">
+        <!-- Year Selection -->
+        <div class="relative">
+          <select id="yearSelect" class="bg-gray-700 text-white p-2 rounded-lg">
+            <option value="2024">Year: 2024</option>
+            <option value="2023">Year: 2023</option>
+            <option value="2022">Year: 2022</option>
+            <!-- Add more years as needed -->
+          </select>
+        </div>
 
-            <div class="overflow-x-auto">
-              <table class="min-w-full bg-gray-800 rounded-lg">
-                  <thead class="bg-orange-600">
-                      <tr>
-                          <th class="py-3 px-6 text-left">Id</th>
-                          <th class="py-3 px-6 text-left">First Name</th>
-                          <th class="py-3 px-6 text-left">Last Name</th>
-                          <th class="py-3 px-6 text-left">Email</th>
-                          <th class="py-3 px-6 text-left">Phone</th>
-                          <th class="py-3 px-6 text-left">Address</th>
-                          <th class="py-3 px-6 text-center">Action</th>
-                      </tr>
-                  </thead>
-                  <tbody class="bg-gray-700 text-gray-100">
-                      <% customers.forEach(customer => { %>
-                          <tr class="border-b border-gray-600">
-                              <td class="py-4 px-6"><%= customer.id %></td>
-                              <td class="py-4 px-6"><%= customer.firstName %></td>
-                              <td class="py-4 px-6"><%= customer.lastName %></td>
-                              <td class="py-4 px-6"><%= customer.email %></td>
-                              <td class="py-4 px-6"><%= customer.phone %></td>
-                              <td class="py-4 px-6"><%= customer.address %></td>
-                              <td class="py-4 px-6 text-center">
-                                  <button class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Block</button>
-                                  <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Unblock</button>
-                              </td>
-                          </tr>
-                      <% }) %>
-                  </tbody>
-              </table>
+        <!-- Download Button with Options -->
+        <div class="relative">
+          <button id="dropdownButton" class="bg-green-600 hover:bg-green-500 p-2 rounded text-white flex items-center">
+            Download
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <!-- Dropdown Menu -->
+          <div id="dropdown" class="hidden absolute right-0 mt-2 w-40 bg-white text-black rounded shadow-lg z-20">
+            <a href="/download-report?type=excel" class="block px-4 py-2 hover:bg-gray-100">Excel</a>
+            <a href="/download-report?type=word" class="block px-4 py-2 hover:bg-gray-100">Word</a>
+            <a href="/download-report?type=pdf" class="block px-4 py-2 hover:bg-gray-100">PDF</a>
           </div>
-          
-            <!-- Pagination -->
-            <div class="flex justify-center mt-6">
-                <nav>
-                    <ul class="flex space-x-2">
-                        <li><button class="bg-gray-700 text-white px-3 py-1 rounded-md">Prev</button></li>
-                        <li><button class="bg-gray-600 text-white px-3 py-1 rounded-md">1</button></li>
-                        <li><button class="bg-gray-700 text-white px-3 py-1 rounded-md">2</button></li>
-                        <li><button class="bg-gray-700 text-white px-3 py-1 rounded-md">3</button></li>
-                        <li><button class="bg-gray-700 text-white px-3 py-1 rounded-md">Next</button></li>
-                    </ul>
-                </nav>
-            </div>
-        </main>
+        </div>
+      </div>
     </div>
+
+    <!-- Card Section -->
+    <div class="grid grid-cols-4 gap-6">
+      <div class="card p-4 rounded-lg text-white">
+        <h2 class="text-lg">Revenue</h2>
+        <p class="text-xl font-bold">₹7,82,5000</p>
+        <span class="positive">+22%</span>
+      </div>
+      <div class="card p-4 rounded-lg text-white">
+        <h2 class="text-lg">Orders</h2>
+        <p class="text-xl font-bold">5000</p>
+        <span class="negative">-22%</span>
+      </div>
+      <div class="card p-4 rounded-lg text-white">
+        <h2 class="text-lg">Products Sold</h2>
+        <p class="text-xl font-bold">5240</p>
+        <span class="positive">+2%</span>
+      </div>
+      <div class="card p-4 rounded-lg text-white">
+        <h2 class="text-lg">Total Customers</h2>
+        <p class="text-xl font-bold">350</p>
+        <span class="positive">+8%</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dropdown Toggle Script
+    const dropdownButton = document.getElementById('dropdownButton');
+    const dropdown = document.getElementById('dropdown');
+    
+    dropdownButton.addEventListener('click', () => {
+      dropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function(event) {
+      if (!dropdownButton.contains(event.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+  </script>
 
 </body>
 </html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapMart - Order Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+        <!-- Main Content -->
+        <div class="flex-1 p-4">
+            <%- include('../partials/adminLoginIcon') %>
+           
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+              <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                 
+                  <li>
+                      <div class="flex items-center">
+                          <span class="text-gray-500"></span>
+                          <a href="/admin/dashboard" class="ml-1 text-gray-700 hover:text-purple-600">Dashboard</a>
+                      </div>
+                  </li>
+                  <li>
+                      <div class="flex items-center">
+                          <span class="text-gray-500">/</span>
+                          <a href="/admin/orders" class="ml-1 text-gray-700 hover:text-purple-600">Orders</a>
+                      </div>
+                  </li>
+              </ol>
+          </nav>
+          <!-- Main Container -->
+  <div class="flex justify-center pt-8">
+    <div class="w-full max-w-4xl bg-black shadow-lg rounded-lg overflow-hidden">
+      
+      <!-- Order Details -->
+      <div class="p-8 mt-0">
+        <h1 class="text-3xl font-bold mb-4">Order Details</h1>
+        <h2 class="text-xl font-semibold mb-2">Order #<%= order.orderId %></h2>
+        <div class="grid grid-cols-2 gap-4">
+          <p><strong>Customer Name:</strong> <%= order.userId.userName %></p>
+          <p><strong>Order Date:</strong> <%= order.createdAt.toLocaleString() %></p>
+          <p><strong>Total Amount:</strong> ₹<%= order.totalAmount.toFixed(2) %></p>
+              <p><strong>Payment Method  :</strong> <%= order.paymentMethod %></p>
+        </div>
+
+        <h3 class="text-2xl font-bold my-4 ">Shipping Address</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <% Object.keys(order.shippingAddress).forEach(key => { %>
+          <p class="flex items-center">
+            <span class="font-medium mr-2"><%= key %>:</span>
+            <span><%= order.shippingAddress[key] %></span>
+          </p>
+          <% }); %>
+        </div>
+
+        <h3 class="text-2xl text-black font-bold my-4">Items</h3>
+        <div class="space-y-4">
+          <% order.items.forEach(item => { %>
+          <div class="bg-gray-100 text-black p-4 rounded-lg flex items-center space-x-4">
+            <img src="<%=item.productId.images[0] %>" alt="Product Image" class="w-24 h-24 object-cover rounded-md" />
+            <div>
+              <h4 class="text-lg font-semibold"><%= item.productId.name %></h4>
+              <p>Price: ₹<%= item.productId.price %></p>
+              <p>Quantity: <%= item.quantity %></p>
+              <p>Total: ₹<%= item.itemTotal %></p>
+              <p >
+                Status: <span class="text-red-500 <%= item.itemOrderStatus === 'pending' ? 'text-4xl text-black' : 'text-green-500' %>"><%= item.itemOrderStatus %></span>
+            </p>
+            
+            </div>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,108 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wallet</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    .break { background: #E4DCCF; }
+    .table-container { 
+      background: #111111; /* Black background for the table */
+      border-radius: 12px; 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); 
+      overflow: hidden; 
+      margin-top: 20px;
+    }
+    .table-header { background: #FFA500; color: white; } /* Orange header */
+    .table-row { background: #111111; color: white; } /* Black row background */
+    .table-row:hover { background: #7d5904; } /* Yellow hover effect */
+    .table-row:nth-child(even) { background: #111111; } /* Keep even rows black */
+
+    .achu{
+      background-color: #117f18;
+    }
+  </style>
+  <script>
+    function toggleAddMoney() {
+      const inputContainer = document.getElementById('addMoneyInputContainer');
+      inputContainer.classList.toggle('hidden');
+      document.getElementById('addMoneyInput').value = ''; // Clear the input field
+    }
+
+    function submitAddMoney() {
+      const amount = document.getElementById('addMoneyInput').value;
+      if (amount && !isNaN(amount) && amount > 0) {
+        // Here you would typically send the amount to your server
+        alert(Adding ₹${amount} to your wallet!);
+        // Reset the input field
+        document.getElementById('addMoneyInput').value = '';
+      } else {
+        alert('Please enter a valid amount.');
+      }
+    }
+  </script>
+</head>
+<body class="break font-sans antialiased">
+  <!-- Header and Navbar -->
+  <%- include('../partials/header') %>
+  <%- include('../partials/navbar') %>
+  <div class="flex">
+    <%- include('../partials/modifiedUsidebar') %>
+
+    <div class="max-w-3xl mx-auto p-6">
+      <!-- Wallet Balance Card -->
+      <div class="achu text-white rounded-lg shadow-lg p-6 mb-6 text-center">
+        <h2 class="text-2xl font-semibold">Wallet Balance</h2>
+        <p class="text-4xl font-bold mt-2">₹<%= walletItems.balance.toFixed(2) %></p>
+      </div>
+
+      <!-- Add Money Button -->
+      <div class="flex justify-end mb-4">
+        <button onclick="toggleAddMoney()" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600">
+          Add Money
+        </button>
+      </div>
+      <div class="hidden mb-4" id="addMoneyInputContainer">
+        <input id="addMoneyInput" type="number" placeholder="Enter amount" class="border border-gray-300 rounded-lg p-2" />
+        <button onclick="submitAddMoney()" class="bg-green-500 text-white px-4 py-2 rounded-lg shadow hover:bg-green-600 ml-2">
+          Submit
+        </button>
+      </div>
+
+      <!-- Transaction History -->
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">Transaction History</h3>
+      <% if (walletItems.transaction && walletItems.transaction.length > 0) { %>
+        <div class="table-container">
+          <table class="min-w-full">
+            <thead>
+              <tr class="table-header">
+                <th class="py-3 px-4">Date</th>
+                <th class="py-3 px-4">Type</th>
+                <th class="py-3 px-4">Order ID</th>
+                <th class="py-3 px-4">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% walletItems.transaction.forEach(transaction => { %>
+                <tr class="table-row">
+                  <td class="py-2 px-4 border-b"><%= new Date(transaction.transactionDate).toLocaleDateString() %></td>
+                  <td class="py-2 px-4 border-b"><%= transaction.transactionType %></td>
+                  <td class="py-2 px-4 border-b">Order ID: <%= transaction.orderId %></td>
+                  <td class="py-2 px-4 border-b <%= transaction.walletamount >= 0 ? 'text-green-400' : 'text-red-400' %>">
+                    <%= transaction.walletamount >= 0 ? "+" : "-" %>₹<%= Math.abs(transaction.walletamount).toFixed(2) %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-gray-500 text-center">No transactions found.</p>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

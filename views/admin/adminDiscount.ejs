@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Discount Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Header Partial -->
+    <%- include('../partials/adminloginIcon') %>
+
+    <div class="flex">
+        <!-- Sidebar Partial -->
+        <%- include('../partials/adminSidebar') %>
+
+        <div class="flex-grow p-6">
+            <h1 class="text-2xl font-bold mb-4">Discount Management</h1>
+            <table class="min-w-full bg-white border border-gray-300">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">SL No</th>
+                        <th class="py-2 px-4 border-b">Discount Type</th>
+                        <th class="py-2 px-4 border-b">Product</th>
+                        <th class="py-2 px-4 border-b">Category</th>
+                        <th class="py-2 px-4 border-b">Created Date</th>
+                        <th class="py-2 px-4 border-b">Expiration Date</th>
+                        <th class="py-2 px-4 border-b">Discount Value</th>
+                        <th class="py-2 px-4 border-b">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% discounts.forEach((discount, index) => { %>
+                        <tr class="hover:bg-gray-100">
+                            <td class="py-2 px-4 border-b"><%= index + 1 %></td>
+                            <td class="py-2 px-4 border-b"><%= discount.type %></td>
+                            <td class="py-2 px-4 border-b"><%= discount.productName %></td>
+                            <td class="py-2 px-4 border-b"><%= discount.categoryName %></td>
+                            <td class="py-2 px-4 border-b"><%= discount.createdDate.toLocaleDateString() %></td>
+                            <td class="py-2 px-4 border-b"><%= discount.expirationDate.toLocaleDateString() %></td>
+                            <td class="py-2 px-4 border-b"><%= discount.value %></td>
+                            <td class="py-2 px-4 border-b">
+                                <a href="/admin/discount/edit/<%= discount._id %>" class="text-blue-600 hover:underline">Edit</a>
+                                <button class="text-red-600 hover:underline" onclick="confirmDelete('<%= discount._id %>')">Remove</button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function confirmDelete(id) {
+            if (confirm("Are you sure you want to remove this discount?")) {
+                window.location.href = `/admin/discount/remove/${id}`;
+            }
+        }
+    </script>
+</body>
+</html>

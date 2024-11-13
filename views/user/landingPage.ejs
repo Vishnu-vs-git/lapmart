@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapMart - Home</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="bg-white">
+    <!-- Include Header -->
+    
+ <!-- Header/Navbar Section -->
+ <%-include('../partials/loggedheader') %>
+    <!-- Include Navigation Bar -->
+    <nav class="bg-yellow-500 font-black">
+        <div class="container mx-auto flex justify-around flex-wrap py-2 px-2">
+            <a href="#" class="hover:text-orange-500">Samsung</a>
+            <a href="#" class="hover:text-orange-500">Apple</a>
+            <a href="#" class="hover:text-orange-500">Dell</a>
+            <a href="#" class="hover:text-orange-500">Lenovo</a>
+            <a href="#" class="hover:text-orange-500">HP</a>
+        </div>
+    </nav>
+
+    <!-- Carousel Section -->
+    <section class="relative">
+        <div class="carousel">
+            <!-- First slide -->
+            <div class="carousel-slide">
+                <div class="relative w-full h-64 sm:h-80 md:h-80 lg:h-[400px]">
+                    <img src="/Dell_R3_1500X300._CB544498108_.jpg" alt="Banner 1" class="absolute inset-0 w-full h-full object-cover">
+                </div>
+            </div>
+            <!-- Second slide -->
+            <div class="carousel-slide hidden">
+                <div class="relative w-full h-64 sm:h-80 md:h-80 lg:h-[400px]">
+                    <img src="/Dell_1500x300._CB544952176_.jpg" alt="Banner 2" class="absolute inset-0 w-full h-full object-cover">
+                </div>
+            </div>
+            <!-- Third slide -->
+            <div class="carousel-slide hidden">
+                <div class="relative w-full h-64 sm:h-80 md:h-80 lg:h-[400px]">
+                    <img src="/Intel_i7_1500x300._CB544553100_.gif" alt="Banner 3" class="absolute inset-0 w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-between absolute top-1/2 transform -translate-y-1/2 w-full px-4">
+            <button id="prev" class="bg-orange-500 text-white rounded-full p-2">❮</button>
+            <button id="next" class="bg-orange-500 text-white rounded-full p-2">❯</button>
+        </div>
+    </section>
+
+    <!-- Blockbuster Deals Section -->
+    <section class="py-12 bg-white text-black">
+        <div class="container mx-auto text-center">
+            <h2 class="text-2xl sm:text-4xl font-bold mb-8">Blockbuster Deals</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <% if (blockbusterDeals && blockbusterDeals.length > 0) { %>
+                    <% blockbusterDeals.forEach((product) => { %>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <img src="<%= product.image %>" alt="<%= product.name %>" class="w-full mb-4">
+                            <h3 class="text-lg font-bold"><%= product.name %></h3>
+                            <p class="text-gray-600"><%= product.description %></p>
+                            <p class="text-orange-500 font-bold">Effective price: ₹<%= product.price %></p>
+                            <button class="bg-orange-500 text-white py-2 px-4 mt-4 rounded">Shop Now</button>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p>No deals available at the moment.</p>
+                <% } %>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Arrivals Section -->
+    <section class="py-12 bg-red-500 text-white">
+        <div class="container mx-auto text-center">
+            <h2 class="text-2xl sm:text-4xl font-bold mb-8">New Arrivals</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <% if (newArrivals && newArrivals.length > 0) { %>
+                    <% newArrivals.forEach((product) => { %>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <img src="<%= product.image %>" alt="<%= product.name %>" class="w-full mb-4">
+                            <h3 class="text-lg font-bold"><%= product.name %></h3>
+                            <p class="text-gray-600"><%= product.description %></p>
+                            <p class="text-orange-500 font-bold">Effective price: ₹<%= product.price %></p>
+                            <button class="bg-orange-500 text-white py-2 px-4 mt-4 rounded">Shop Now</button>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <p>No new arrivals at the moment.</p>
+                <% } %>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shop by Brand Section -->
+    <section class="py-12 bg-gray-200 text-black">
+        <div class="container mx-auto text-center">
+            <h2 class="text-2xl sm:text-4xl font-bold mb-8">Shop by Brand</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6"> <!-- Updated to grid-cols-5 -->
+                <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="flex justify-center items-center h-32">
+                        <img src="/vecteezy_samsung-logo-png-samsung-icon-transparent-png_20975669.png" alt="Samsung" class="object-contain h-full">
+                    </div>
+                </a>
+                <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="flex justify-center items-center h-32">
+                        <img src="/apple-logo-icon-14915.png" alt="Apple" class="object-contain h-full">
+                    </div>
+                </a>
+                <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="flex justify-center items-center h-32">
+                        <img src="/vecteezy_acer-logo-png-acer-icon-transparent-png_19766419.png" alt="Acer" class="object-contain h-full">
+                    </div>
+                </a>
+                <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="flex justify-center items-center h-32">
+                        <img src="/vecteezy_hp-transparent-png-hp-free-png_19909480.png" alt="HP" class="object-contain h-full">
+                    </div>
+                </a>
+                <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="flex justify-center items-center h-32">
+                        <img src="/png-transparent-laptop-lenovo-logo-computer-lenovo-logo-electronics-text-trademark-thumbnail.png" alt="Lenovo" class="object-contain h-full">
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- View All Products Section -->
+    <section class="py-12 bg-white text-black">
+        <div class="container mx-auto text-center">
+            <h2 class="text-2xl sm:text-4xl font-bold mb-8">Browse All Products</h2>
+            <button 
+                class="bg-green-500 text-black py-3 px-6 rounded-lg hover:bg-orange-600" 
+                onclick="window.location.href='/products'">
+                View All Products
+            </button>
+        </div>
+    </section>
+
+    <!-- Include Footer -->
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 LapMart. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Include JavaScript for Carousel functionality -->
+    <script>
+        let slides = document.querySelectorAll('.carousel-slide');
+        let currentSlide = 0;
+
+        document.getElementById('next').addEventListener('click', () => {
+            slides[currentSlide].classList.add('hidden');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.remove('hidden');
+        });
+
+        document.getElementById('prev').addEventListener('click', () => {
+            slides[currentSlide].classList.add('hidden');
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            slides[currentSlide].classList.remove('hidden');
+        });
+    </script>
+</body>
+
+</html>

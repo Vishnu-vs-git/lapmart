@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapMart - Edit Product</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+        <div class="flex-1 p-8">
+            <%- include('../partials/adminLoginIcon') %>
+            <h1 class="text-4xl font-bold text-orange-400 mb-4">Edit Product</h1>
+            <!-- <% if (message) { %>
+                <div id="message" class="mt-4 text-center <%= message.type === 'error' ? 'text-red-500' : 'text-green-500' %> bg-gray-700 p-2 rounded">
+                    <%= message.text %>
+                </div>
+            <% } %> -->
+            <form id="editProductForm" action="/admin/editProduct/<%= product._id %>" method="POST">
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label for="name">Product Name</label>
+                        <input type="text" id="productName" name="name" value="<%= product.name %>" class="w-full border text-black" >
+                    </div>
+                    <div>
+                        <label for="price">Product Price</label>
+                        <input type="number" id="productPrice" name="price" value="<%= product.price %>" class="w-full border text-black" >
+                    </div>
+                    <div>
+                        <label for="quantity">Product Quantity</label>
+                        <input type="number" id="productQuantity" name="quantity" value="<%= product.quantity %>" class="w-full border text-black" >
+                    </div>
+                    <div>
+                        <label for="category">Product Category</label>
+                        <select id="productCategory" name="category" class="w-full border text-black" required>
+                            <option value="" disabled>Select a category</option> <!-- Prompt option -->
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>" 
+                                    <%= product.category[0] === category.name ? 'selected' : '' %>>
+                                    <%= category.name %>
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="discountType">Discount Type</label>
+                        <select id="discountType" name="discountType" class="w-full border text-black">
+                            <option value="none" <%= !product.discountType ? 'selected' : '' %>>None</option>
+                            <option value="fixed" <%= product.discountType === 'fixed' ? 'selected' : '' %>>Fixed</option>
+                            <option value="percentage" <%= product.discountType === 'percentage' ? 'selected' : '' %>>Percentage</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="discountValue">Discount Value</label>
+                        <input type="number" value="<%= product.discountValue %>"  id="discountValue" name="discountValue" class="w-full border text-black" >
+                    </div>
+                    <div>
+                        <label for="discountValue">featured</label>
+                        <input type="text" value="<%= product.isfeatured %>"  id="isfeatured" name="isfeatured" class="w-full border text-black" >
+                    </div>
+                    
+                    
+                    <!------------->
+                  
+                  
+                    
+
+                  
+                    <div>
+                        <label for="description">Product description</label>
+                        <input type="text" id="productDescription" name="description"value="<%= product.description %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="processor">Product processor</label>
+                        <input type="text" id="productProcessor" name="processor"value="<%= product.processor %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="processorGeneration">Product processor generation</label>
+                        <input type="text" id="processorGeneration" name="processorGeneration"value="<%= product.processorGeneration %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="ramCapacity">Product ram capacity</label>
+                        <input type="text" id="ramCapacity" name="ramCapacity"value="<%= product.ramCapacity %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="ramGeneration">Product ram generation</label>
+                        <input type="text" id="ramGeneration" name="ramGeneration"value="<%= product.ramGeneration %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="storageType">Product storage type</label>
+                        <input type="text" id="storageType" name="storageType"value="<%= product.storageType %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="weight">Product weight</label>
+                        <input type="text" id="productWeight" name="weight" value="<%= product.weight %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="touchScreen">Touchscreen</label>
+                        <input type="text" id="touchScreen" name="touchScreen"value="<%= product.touchScreen %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="operatingSystem">Product operating system</label>
+                        <input type="text" id="operatingSystem" name="operatingSystem"value="<%= product.operatingSystem %>" class="w-full border text-black">
+                    </div>
+                    <div>
+                        <label for="graphicsType">Product graphics type</label>
+                        <input type="text" id="graphicsType" name="graphicsType"value="<%= product.graphicsType %>" class="w-full border text-black">
+                    </div>
+                    <!-- Add this inside the form in your edit product page -->
+
+    <!-- Existing Key Features -->
+    <div class="col-span-3">
+        <label for="keyFeatures">Product Key Features</label>
+        
+        
+        <div id="keyFeaturesContainer">
+            <% product.keyFeatures.forEach((feature, index) => { %>
+                <div class="flex items-center mb-2">
+                    <input type="text" name="keyFeatures[]" value="<%= feature %>" class="w-full border text-black" placeholder="Enter a key feature">
+                    <button type="button" class="removeKeyFeatureButton bg-red-500 text-white px-2 py-1 ml-2 rounded" data-index="<%= index %>">Remove</button>
+                </div>
+            <% }) %>
+        </div>
+    
+        <!-- Add Another Key Feature Button -->
+        <button type="button" id="addKeyFeatureButton" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Add Another Key Feature</button>
+    </div>
+    
+
+
+
+                    <!-- Color Fields for Multiple Colors -->
+                    <div id="colorFields" class="col-span-3">
+                        <label for="color">Product Colors</label>
+                        <% product.color.forEach(color => { %>
+                            <div>
+                                <input type="text" name="color[]" value="<%= color %>" class="w-full border text-black mt-2" placeholder="Enter a color">
+                            </div>
+                        <% }) %>
+                    </div>
+                    <button type="button" id="addColorButton" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Add Another Color</button>
+
+                    <!-- Existing Images Section -->
+                    <div class="col-span-3">
+                        <label>Existing Product Images</label>
+                        <div id="existingImages" class="grid grid-cols-4 gap-4 mt-4">
+                            <% product.images.forEach((image, index) => { %>
+                                <div class="relative">
+                                    <img src="<%= image %>" alt="Product Image" class="w-full h-48 object-cover">
+                                    <button type="button"  class="removeImageButton bg-red-500 text-white absolute top-0 right-0 p-1" 
+                                            data-product-id="<%= product._id %>" data-image-url="<%= image %>">Remove</button>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload Section -->
+                    <div class="col-span-3">
+                        <label>Product Images (Upload new images one by one)</label>
+                        <input type="file" id="productImage" accept="image/*" class="w-full border">
+                        <button type="button" id="cropButton" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Crop & Upload</button>
+                        <div id="imagePreview" class="grid grid-cols-4 gap-4 mt-4"></div>
+                    </div>
+
+                    <div class="col-span-3 text-center mb-20">
+                        <button type="submit" id="submitBtn" class="bg-green-500 text-white px-4 py-2 rounded">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cropper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+        // Key Features Management
+        const keyFeaturesContainer = document.getElementById('keyFeaturesContainer');
+        const addKeyFeatureButton = document.getElementById('addKeyFeatureButton');
+    
+        // Add another key feature dynamically
+        addKeyFeatureButton.addEventListener('click', function () {
+            const newFeatureDiv = document.createElement('div');
+            newFeatureDiv.classList.add('flex', 'items-center', 'mb-2');
+            newFeatureDiv.innerHTML = `
+                <input type="text" name="keyFeatures[]" class="w-full border text-black" placeholder="Enter a key feature">
+                <button type="button" class="removeKeyFeatureButton bg-red-500 text-white px-2 py-1 ml-2 rounded">Remove</button>
+            `;
+            keyFeaturesContainer.appendChild(newFeatureDiv);
+    
+            // Add event listener to the newly created remove button
+            newFeatureDiv.querySelector('.removeKeyFeatureButton').addEventListener('click', function () {
+                newFeatureDiv.remove();
+            });
+        });
+    
+        // Remove existing key feature
+        document.querySelectorAll('.removeKeyFeatureButton').forEach(button => {
+            button.addEventListener('click', function () {
+                this.parentElement.remove();
+            });
+        });
+    </script>
+    
+
+    <script>
+        let cropper = null;
+        let croppedImages = [];
+        const imagePreview = document.getElementById('imagePreview');
+        const productImages = document.getElementById('productImage');
+        const cropButton = document.getElementById('cropButton');
+        const submitBtn = document.getElementById('submitBtn');
+
+        productImages.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.classList.add('w-full', 'h-48', 'object-cover');
+
+                imagePreview.innerHTML = ''; 
+                imagePreview.appendChild(img);
+
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                img.onload = function () {
+                    cropper = new Cropper(img, {
+                        aspectRatio: NaN, 
+                        viewMode: 1, 
+                        background: false,
+                        autoCropArea: 1, 
+                    });
+                };
+            }
+        });
+
+        cropButton.addEventListener('click', async function () {
+            if (!cropper) return alert('Please select an image first!');
+
+            const canvas = cropper.getCroppedCanvas();
+
+            canvas.toBlob(async function (blob) {
+                let formData = new FormData();
+                formData.append('file', blob);
+                formData.append('upload_preset', 'vishnu');
+                formData.append('api_key', '385746979633158');
+
+                try {
+                    const response = await fetch('https://api.cloudinary.com/v1_1/dzypi6gbs/image/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+
+                    croppedImages.push(data.secure_url);
+
+                    cropper.destroy();
+                    cropper = null;
+                    productImages.value = '';
+
+                    imagePreview.innerHTML = '';
+                    croppedImages.forEach(url => {
+                        const imgPreview = document.createElement('img');
+                        imgPreview.src = url;
+                        imgPreview.classList.add('w-full', 'h-48', 'object-cover');
+                        imagePreview.appendChild(imgPreview);
+                    });
+
+                } catch (error) {
+                    console.error('Image upload failed:', error);
+                    alert('Image upload failed: ' + error.message);
+                }
+            });
+        });
+
+        document.getElementById('editProductForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'croppedImages';
+            hiddenInput.value = JSON.stringify(croppedImages);
+
+            this.appendChild(hiddenInput);
+            this.submit();
+        });
+
+        // Dynamic Color Fields
+        const colorFields = document.getElementById('colorFields');
+        const addColorButton = document.getElementById('addColorButton');
+
+        addColorButton.addEventListener('click', function() {
+            const newColorField = document.createElement('div');
+            newColorField.innerHTML = `
+                <input type="text" name="color[]" class="w-full border text-black mt-2" placeholder="Enter a color">
+            `;
+            colorFields.appendChild(newColorField);
+        });
+
+        // Remove Image Button Functionality
+        document.querySelectorAll('.removeImageButton').forEach(button => {
+            button.addEventListener('click', function () {
+                const productId = this.dataset.productId;
+                const imageUrl = this.dataset.imageUrl;
+
+                fetch('/admin/removeImage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId, image: imageUrl }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                       
+                        location.reload(); // Reload the page to reflect the change
+                    } else {
+                        alert('Error removing image.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error removing image.');
+                });
+            });
+        });
+
+       
+
+
+
+    </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- If message exists, show a SweetAlert message -->
+<% if (message) { %>
+    <script>
+        Swal.fire({
+            title: '<%= message.type === "success" ? "Success!" : "Error!" %>',
+            text: '<%= message.text %>',
+            icon: '<%= message.type %>',
+            confirmButtonText: 'OK'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/admin/products'; // Change this to the correct route for adminProducts
+            }
+        });
+    </script>
+<% } %>
+
+  
+
+
+
+  
+      
+</body>
+</html>

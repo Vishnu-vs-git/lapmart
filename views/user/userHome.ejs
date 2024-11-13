@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapMart - Home</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body class="bg-white">
+    <!-- Include Header -->
+    <!-- Header/Navbar Section -->
+    <%-include('../partials/loggedheader') %>
+
+    <!-- Include Navigation Bar -->
+    <nav class="bg-yellow-500 font-black">
+        <div class="container mx-auto flex justify-around flex-wrap py-2 px-2">
+            <a href="#" class="hover:text-orange-500">Samsung</a>
+            <a href="#" class="hover:text-orange-500">Apple</a>
+            <a href="#" class="hover:text-orange-500">Dell</a>
+            <a href="#" class="hover:text-orange-500">Lenovo</a>
+            <a href="#" class="hover:text-orange-500">HP</a>
+        </div>
+    </nav>
+
+    <!-- Carousel Section -->
+    <!-- Carousel Section -->
+    <section class="relative">
+      <div class="carousel">
+          <!-- First slide -->
+          <div class="carousel-slide">
+              <div class="relative w-full h-64 sm:h-80 md:h-80 lg:h-[400px]">
+                  <img src="/Dell_R3_1500X300._CB544498108_.jpg" alt="Banner 1" class="absolute inset-0 w-full h-full object-cover">
+              </div>
+          </div>
+          <!-- Second slide -->
+          <div class="carousel-slide hidden">
+              <div class="relative w-full h-64 sm:h-80 md:h-80 lg:h-[400px]">
+                  <img src="/Dell_1500x300._CB544952176_.jpg" alt="Banner 2" class="absolute inset-0 w-full h-full object-cover">
+              </div>
+          </div>
+          <!-- Third slide -->
+          <div class="carousel-slide hidden">
+              <div class="relative w-full h-64 sm:h-80 md:h-80 lg:h-[400px]">
+                  <img src="/Intel_i7_1500x300._CB544553100_.gif" alt="Banner 3" class="absolute inset-0 w-full h-full object-cover">
+              </div>
+          </div>
+      </div>
+      <div class="flex justify-between absolute top-1/2 transform -translate-y-1/2 w-full px-4">
+          <button id="prev" class="bg-orange-500 text-white rounded-full p-2">❮</button>
+          <button id="next" class="bg-orange-500 text-white rounded-full p-2">❯</button>
+      </div>
+  </section>
+
+
+    <!-- start of product section -->
+     <!-- Blockbuster Deals Section -->
+     <section class="py-12 bg-gray-200 text-black">
+        <main class="w-full px-0 sm:px-4 py-6"> <!-- Full width with no side padding -->
+            <h2 class="text-2xl sm:text-4xl font-bold mb-8 text-center">Featured</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                <% blockbusterDeals.forEach(product => { %>
+                    <%
+                        let discountedPrice;
+                        if (product.discountType === 'fixed') {
+                            discountedPrice = product.price - product.discountValue;
+                        } else if (product.discountType === 'percentage') {
+                            discountedPrice = product.price - (product.price * product.discountValue / 100);
+                        } else {
+                            discountedPrice = product.price; // No discount
+                        }
+                    %>
+                    <div class="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full relative">
+                        <div class="absolute top-1 right-2 text-gray-500 hover:text-red-500 transition duration-200 cursor-pointer"onclick="addToWishlist('<%= product._id %>')"> 
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
+                        </div>
+                        <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="w-11/12 h-64 object-fit mx-auto">
+                        <div class="p-4 flex flex-col justify-between flex-grow">
+                            <!-- Truncate product name to prevent overflow -->
+                            <h2 class="text-lg text-gray-800 font-extrabold h-16 overflow-hidden">
+                                <%= product.name %>
+                            </h2>
+    
+                            <% if (product.discountValue > 0) { %>
+                                <div class="text-gray-700">
+                                    <p>Price: <span class="line-through">₹<%= product.price %></span></p>
+                                    <p>
+                                        Offer Price: 
+                                        <span class="text-green-500 font-semibold">₹<%= discountedPrice %></span>
+                                        (<%= product.discountType === 'percentage' ? product.discountValue + '%' : '₹' + product.discountValue %> OFF)
+                                    </p>
+                                </div>
+                            <% } else { %>
+                                <p class="text-gray-700">Price: ₹<%= product.price %></p>
+                            <% } %>
+    
+                            <p class="text-gray-500">Rating: <%= product.rating %> / 5</p>
+    
+                            <div class="mt-4">
+                                <a href="/products/<%= product.id %>" class="inline-block bg-blue-500 text-white rounded px-4 py-2 text-center w-full">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </main>
+    </section>
+    
+
+  <!-- New Arrivals Section -->
+  <section class="py-12 bg-red-500 text-white">
+    <main class="w-full px-0 sm:px-4 py-6"> <!-- Full width with no side padding -->
+        <h2 class="text-2xl sm:text-4xl font-bold mb-8 text-center">New Arrivals</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <% newArrivals.forEach(product => { %>
+                <%
+                    let discountedPrice;
+                    if (product.discountType === 'fixed') {
+                        discountedPrice = product.price - product.discountValue;
+                    } else if (product.discountType === 'percentage') {
+                        discountedPrice = product.price - (product.price * product.discountValue / 100);
+                    } else {
+                        discountedPrice = product.price; // No discount
+                    }
+                %>
+                <div class="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full relative">
+                    <div class="absolute top-1 right-2 text-gray-500 hover:text-red-500 transition duration-200 cursor-pointer" onclick="addToWishlist('<%= product._id %>')">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    </div>
+                    <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="w-11/12 h-64 object-fit mx-auto">
+                    <div class="p-4 flex flex-col justify-between flex-grow">
+                        <!-- Truncate product name to prevent overflow -->
+                        <h2 class="text-lg text-gray-800 font-extrabold h-16 overflow-hidden">
+                            <%= product.name %>
+                        </h2>
+
+                        <% if (product.discountValue > 0) { %>
+                            <div class="text-gray-700">
+                                <p>Price: <span class="line-through">₹<%= product.price %></span></p>
+                                <p>
+                                    Offer Price: 
+                                    <span class="text-green-500 font-semibold">₹<%= discountedPrice %></span>
+                                    (<%= product.discountType === 'percentage' ? product.discountValue + '%' : '₹' + product.discountValue %> OFF)
+                                </p>
+                            </div>
+                        <% } else { %>
+                            <p class="text-gray-700">Price: ₹<%= product.price %></p>
+                        <% } %>
+
+                        <p class="text-gray-500">Rating: <%= product.rating %> / 5</p>
+
+                        <div class="mt-4">
+                            <a href="/products/<%= product.id %>" class="inline-block bg-blue-500 text-white rounded px-4 py-2 text-center w-full">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </main>
+</section>
+
+
+
+  <!-- Shop by Brand Section -->
+  <section class="py-12 bg-gray-200 text-black">
+      <div class="container mx-auto text-center">
+          <h2 class="text-2xl sm:text-4xl font-bold mb-8">Shop by Brand</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6"> <!-- Updated to grid-cols-5 -->
+              <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                  <div class="flex justify-center items-center h-32">
+                      <img src="/vecteezy_samsung-logo-png-samsung-icon-transparent-png_20975669.png" alt="Samsung" class="object-contain h-full">
+                  </div>
+              </a>
+              <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                  <div class="flex justify-center items-center h-32">
+                      <img src="/apple-logo-icon-14915.png" alt="Apple" class="object-contain h-full">
+                  </div>
+              </a>
+              <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                  <div class="flex justify-center items-center h-32">
+                      <img src="/vecteezy_acer-logo-png-acer-icon-transparent-png_19766419.png" alt="Acer" class="object-contain h-full">
+                  </div>
+              </a>
+              <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                  <div class="flex justify-center items-center h-32">
+                      <img src="/vecteezy_hp-transparent-png-hp-free-png_19909480.png" alt="HP" class="object-contain h-full">
+                  </div>
+              </a>
+              <a href="#" class="block bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition">
+                  <div class="flex justify-center items-center h-32">
+                      <img src="/png-transparent-laptop-lenovo-logo-computer-lenovo-logo-electronics-text-trademark-thumbnail.png" alt="Lenovo" class="object-contain h-full">
+                  </div>
+              </a>
+          </div>
+      </div>
+  </section>
+
+  <!-- View All Products Section -->
+  <section class="py-12 bg-white text-black">
+      <div class="container mx-auto text-center">
+          <h2 class="text-2xl sm:text-4xl font-bold mb-8">Browse All Products</h2>
+          <button 
+              class="bg-green-500 text-black py-3 px-6 rounded-lg hover:bg-orange-600" 
+              onclick="window.location.href='/products'">
+              View All Products
+          </button>
+      </div>
+  </section>
+
+  <!-- Include Footer -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="container mx-auto text-center">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div>
+                <h4 class="font-bold text-lg">Support</h4>
+                <ul class="mt-4 space-y-2">
+                    <li><a href="#" class="hover:underline">Samsung Support</a></li>
+                    <li><a href="#" class="hover:underline">Acer Support</a></li>
+                    <li><a href="#" class="hover:underline">HP Support</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-lg">About Us</h4>
+                <ul class="mt-4 space-y-2">
+                    <li><a href="#" class="hover:underline">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:underline">Cookie Settings</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-lg">Brand</h4>
+                <ul class="mt-4 space-y-2">
+                    <li><a href="#" class="hover:underline">Samsung</a></li>
+                    <li><a href="#" class="hover:underline">Lenovo</a></li>
+                    <li><a href="#" class="hover:underline">Acer</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-lg">Follow Us</h4>
+                <div class="mt-4 flex justify-center space-x-4">
+                    <a href="#"><img src="/icons8-facebook-48.png" class="w-5 h-5"></a>
+                    <a href="#"><img src="/icons8-x-100.png" class="w-5 h-5"></a>
+                    <a href="#"><img src="/icons8-instagram-50.png" class="w-5 h-5"></a>
+                </div>
+            </div>
+        </div>
+        <p class="mt-8">&copy; 2024 LapMart. All Rights Reserved.</p>
+    </div>
+  </footer>
+  
+
+
+     <!-- end of product section -->
+
+    <!-- JavaScript for Dropdown functionality -->
+    <script>
+      // start of carousel script
+      let slides = document.querySelectorAll('.carousel-slide');
+        let currentSlide = 0;
+
+        document.getElementById('next').addEventListener('click', () => {
+            slides[currentSlide].classList.add('hidden');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.remove('hidden');
+        });
+
+        document.getElementById('prev').addEventListener('click', () => {
+            slides[currentSlide].classList.add('hidden');
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            slides[currentSlide].classList.remove('hidden');
+        });
+
+
+        const userIcon = document.getElementById('userIcon');
+        const userDropdown = document.getElementById('userDropdown');
+
+        // Toggle the dropdown on icon click
+        userIcon.addEventListener('click', function (e) {
+            e.preventDefault();
+            userDropdown.classList.toggle('hidden');
+        });
+
+        // Close the dropdown if clicked outside
+        window.addEventListener('click', function (e) {
+            if (!userIcon.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+        
+        
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <% if(message){%>
+    <script>
+        Swal.fire({
+            icon:'<%=message.type %>',
+            text:'<%=message.text %>',
+            confirmButtonText:'ok',
+
+        })
+       
+    </script>
+    <% } %>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        function addToWishlist(productId) {
+            axios.post('/user/addWishlist', { productId: productId })
+                .then(response => {
+                    if (response.data.success) {
+                        // alert('Added to wishlist!');
+                        Swal.fire({
+      title: 'Success!',
+      text: 'Prodct  has been Added to wishlist! successfully.',
+      icon: 'success', // You can also use 'info', 'error', 'warning', etc.
+      iconColor: '#4CAF50', // Custom icon color
+      showConfirmButton: false,
+      confirmButtonText: false,
+      timer :3000,
+      confirmButtonColor: '#4CAF50', // Button color
+      customClass: {
+        popup: 'rounded-alert', // Custom class to style the popup
+        icon: 'custom-icon',    // Custom class to style the icon
+        title: 'custom-title',  // Custom class to style the title
+        confirmButton: 'custom-button' // Custom class for button styling
+      }
+    });
+    
+                    } else {
+                        alert('Could not add to wishlist.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to wishlist:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+    </script>
+    
+</body>
+
+</html>

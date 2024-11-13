@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Coupon</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100">
+  <div class="flex h-screen">
+    <!-- Admin Sidebar -->
+    <%- include('../partials/adminSidebar') %>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 bg-gray-100">
+      
+        <!-- Top Bar with Admin Icon -->
+        <header class="flex justify-end bg-white shadow p-4">
+          <%- include('../partials/adminLoginIcon') %>
+        </header>
+  
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">Edit Coupon</h1>
+      <form action="/admin/coupons/update/<%= coupon._id %>" method="POST" class="max-w-lg mx-auto bg-white p-8 rounded shadow">
+        <!-- Coupon Code -->
+        <div class="mb-4">
+          <label for="couponCode" class="block text-gray-700 font-bold mb-1">Coupon Code</label>
+          <input type="text" id="couponCode" name="code" class="w-full px-4 py-2 border rounded" value="<%= coupon.code %>" required />
+        </div>
+
+        <!-- Coupon Type -->
+        <div class="mb-4">
+          <label for="couponType" class="block text-gray-700 font-bold mb-1">Coupon Type</label>
+          <select id="couponType" name="couponType" class="w-full px-4 py-2 border rounded" required>
+            <option value="percentage" <%= coupon.couponType === 'percentage' ? 'selected' : '' %>>Percentage</option>
+            <option value="number" <%= coupon.couponType === 'number' ? 'selected' : '' %>>Fixed Amount</option>
+          </select>
+        </div>
+
+        <!-- Coupon Value -->
+        <div class="mb-4">
+          <label for="couponValue" class="block text-gray-700 font-bold mb-1">Coupon Value</label>
+          <input type="number" id="couponValue" name="couponValue" class="w-full px-4 py-2 border rounded" value="<%= coupon.couponValue %>" required />
+        </div>
+
+        <!-- Min Purchase Amount -->
+        <div class="mb-4">
+          <label for="minPurchaseAmount" class="block text-gray-700 font-bold mb-1">Min Purchase Amount</label>
+          <input type="number" id="minPurchaseAmount" name="minPurchaseAmount" class="w-full px-4 py-2 border rounded" value="<%= coupon.minPurchaseAmount %>" required />
+        </div>
+
+        <!-- Start Date -->
+        <div class="mb-4">
+          <label for="startDate" class="block text-gray-700 font-bold mb-1">Start Date</label>
+          <input type="date" id="startDate" name="startDate" class="w-full px-4 py-2 border rounded" value="<%= coupon.startDate ? coupon.startDate.toISOString().split('T')[0] : '' %>" />
+        </div>
+
+        <!-- Expiry Date -->
+        <div class="mb-4">
+          <label for="expiryDate" class="block text-gray-700 font-bold mb-1">Expiry Date</label>
+          <input type="date" id="expiryDate" name="expiryDate" class="w-full px-4 py-2 border rounded" value="<%= coupon.expiryDate ? coupon.expiryDate.toISOString().split('T')[0] : '' %>" />
+        </div>
+
+        <!-- Total Usage Limit -->
+        <div class="mb-4">
+          <label for="totalUsageLimit" class="block text-gray-700 font-bold mb-1">Total Usage Limit</label>
+          <input type="number" id="totalUsageLimit" name="totalUsageLimit" class="w-full px-4 py-2 border rounded" value="<%= coupon.totalUsageLimit %>" required />
+        </div>
+
+        <!-- Save Button -->
+        <div class="text-center">
+          <button type="submit" class="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600">Update Coupon</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

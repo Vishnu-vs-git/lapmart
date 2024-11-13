@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapMart - Category Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <%- include('../partials/adminLoginIcon') %>
+            <h1 class="text-4xl font-bold text-orange-400 mb-4">Category Listing</h1>
+
+            <!-- Flash Messages -->
+            <% if (success && success.length > 0) { %>
+                <div id="message" class="bg-green-500 p-4 rounded-lg mb-4">
+                    <p><%= success %></p>
+                </div>
+            <% } %>
+
+            <% if (error && error.length > 0) { %>
+                <div id="message" class="bg-red-500 p-4 rounded-lg mb-4">
+                    <p><%= error %></p>
+                </div>
+            <% } %>
+
+            <!-- Category Table -->
+            <table class="min-w-full bg-gray-800 rounded-lg">
+                <thead>
+                    <tr class="w-full bg-gray-700 text-left">
+                        <th class="px-4 py-2">S.l no</th>
+                        <th class="px-4 py-2">Category Name</th>
+                        <th class="px-4 py-2">Status</th>
+                        <th class="px-4 py-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% categories.forEach((category, index) => { %>
+                        <tr class="border-b border-gray-700">
+                            <td class="px-4 py-2"><%= index + 1 %></td>
+                            <td class="px-4 py-2"><%= category.name %></td>
+                            <td class="px-4 py-2"><%= category.status === 'Active' ? 'Active' : 'Inactive' %></td>
+                            <td class="px-4 py-2 flex space-x-2">
+                                <button 
+                                    onclick="confirmAction('<%= category._id %>', '<%= category.status === 'Active' ? 'block' : 'unblock' %>')" 
+                                    class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
+                                    <%= category.status === 'Active' ? 'Block' : 'Unblock' %>
+                                </button>
+
+                                <!-- Edit Button with SweetAlert Confirmation -->
+                                <a href="javascript:void(0)" 
+                                   onclick="confirmEdit('<%= category._id %>')"
+                                   class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                                    Edit
+                                </a>
+
+                                <!-- Delete Button with SweetAlert Confirmation -->
+                                <button 
+                                    onclick="confirmDelete('<%= category._id %>')" 
+                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+
+            <!-- Add Category Button at the Bottom -->
+            <div class="mt-4">
+                <a href="/admin/addCategory" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">Add New Category</a>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <!-- SweetAlert Script -->
+    <script>
+        function confirmAction(categoryId, action) {
+            const actionText = action === 'block' ? 'block' : 'unblock';
+            const confirmationText = `Are you sure you want to ${actionText} this category?`;
+
+            Swal.fire({
+                title: 'Confirmation',
+                text: confirmationText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to block/unblock route
+                    window.location.href = `/admin/categoryList/${action}/${categoryId}`;
+                }
+            });
+        }
+
+        function confirmEdit(categoryId) {
+            Swal.fire({
+                title: 'Edit Category',
+                text: 'Are you sure you want to edit this category?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to the edit category page
+                    window.location.href = `/admin/editCategory/${categoryId}`;
+                }
+            });
+        }
+
+        function confirmDelete(categoryId) {
+            Swal.fire({
+                title: 'Delete Category',
+                text: 'Are you sure you want to delete this category? This action cannot be undone.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to the delete category route
+                    window.location.href = `/admin/categoryDelete/${categoryId}`;
+                }
+            });
+        }
+
+        // Hide flash message after a few seconds
+        function hideMessage() {
+            const messageElement = document.getElementById('message');
+            if (messageElement) {
+                setTimeout(() => {
+                    messageElement.style.display = 'none';
+                }, 3000); // 3000 milliseconds = 3 seconds
+            }
+        }
+
+        window.onload = function() {
+            hideMessage();
+        };
+    </script>
+</body>
+</html>

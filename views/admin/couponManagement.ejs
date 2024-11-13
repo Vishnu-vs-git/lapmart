@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Coupon Management</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <style>
+      /* Modal Styling */
+      #couponFormContainer {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      #couponFormContainer.active {
+        display: flex;
+      }
+      .modal-content {
+        background-color: rgb(223, 230, 212);
+        padding: 20px;
+        border-radius: 8px;
+        width: 80%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100">
+    <div class="flex h-50">
+      <!-- Admin Sidebar -->
+      <%- include('../partials/adminSidebar') %>
+
+      <!-- Main Content -->
+      <div class="flex-1 p-6 bg-gray-100">
+        <!-- Admin Login Icon -->
+        <%- include('../partials/adminLoginIcon') %>
+
+        <!-- Page Header with Add Coupon Button -->
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-3xl font-bold text-gray-800">Coupon Management</h1>
+          <button
+            id="addCouponBtn"
+            class="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600"
+          >
+            Add New Coupon
+          </button>
+        </div>
+
+        <!-- Coupon Table -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border border-gray-200">
+            <thead>
+              <tr class="bg-gray-100 border-b border-gray-200">
+                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                  Coupon Code
+                </th>
+                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                  Type
+                </th>
+                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                  Value
+                </th>
+                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                  Min Order
+                </th>
+                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                  Start Date
+                </th>
+                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                  End Date
+                </th>
+                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                  Usage Limit
+                </th>
+                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                  Status
+                </th>
+                <th class="py-3 px-4 text-left  text-center font-medium">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <% coupons.forEach((coupon) => { %>
+              <tr
+                id="coupon-<%= coupon._id %>"
+                class="border-b border-gray-200"
+              >
+                <td class="py-3 px-4 text-gray-800"><%= coupon.code %></td>
+                <td class="py-3 px-4 text-gray-800">
+                  <%= coupon.couponType %>
+                </td>
+                <td class="py-3 px-4 text-gray-800">
+                  <%= coupon.couponValue %><%= coupon.couponType ===
+                  'percentage' ? '%' : '' %>
+                </td>
+                <td class="py-3 px-4 text-gray-800">
+                  ₹<%= coupon.minPurchaseAmount %>
+                </td>
+                <td class="py-3 px-4 text-gray-800">
+                  <%= coupon.startDate ?
+                  coupon.startDate.toISOString().split('T')[0] : 'N/A' %>
+                </td>
+                <td class="py-3 px-4 text-gray-800">
+                  <%= coupon.expiryDate ?
+                  coupon.expiryDate.toISOString().split('T')[0] : 'N/A' %>
+                </td>
+                <td class="py-3 px-4 text-gray-800">
+                  <%= coupon.totalUsageLimit %>
+                </td>
+                <td class="py-3 px-4">
+                  <span
+                    class="status px-2 py-1 text-sm font-semibold <%= coupon.isActive ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100' %> rounded"
+                  >
+                    <%= coupon.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td class="py-3 px-4 space-x-2">
+                  <button
+                    class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="editCoupon('<%=coupon._id %> ')"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="block-unblock-btn px-3 py-1 <%= coupon.isActive ? 'bg-red-500' : 'bg-green-500' %> text-white rounded hover:bg-red-600"
+                    onclick="<%= coupon.isActive
+                      ? 'confirmBlock'
+                      : 'confirmUnblock' %>('<%= coupon._id %>')"
+                  >
+                    <%= coupon.isActive ? 'Block' : 'Unblock' %>
+                  </button>
+                  <button
+                    class="block-unblock-btn px-3 py-1 <%= coupon.isActive ? 'bg-red-500' : 'bg-green-500' %> text-white rounded hover:bg-red-600"
+                    onclick="remove('<%= coupon._id %>')"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coupon Form Modal -->
+    <div id="couponFormContainer">
+      <div class="modal-content">
+        <button
+          id="closeCouponForm"
+          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 absolute top-2 right-2"
+        >
+          X
+        </button>
+
+        <!-- Coupon Form HTML -->
+        <form id="couponForm" action="/admin/coupons" method="POST" novalidate>
+          <h2 class="text-center">Add Coupon</h2>
+
+          <!-- Coupon Code -->
+          <div class="mb-4">
+            <label for="couponCode" class="block text-gray-900 font-bold"
+              >Coupon Code</label
+            >
+            <input
+              type="text"
+              id="couponCode"
+              name="code"
+              class="w-full px-4 py-2 border rounded"
+              required
+            />
+            <small id="couponCodeError" class="text-red-500"></small>
+            <!-- Error message -->
+          </div>
+
+          <!-- Coupon Type -->
+          <div class="mb-4">
+            <label for="couponType" class="block text-gray-700"
+              >Coupon Type</label
+            >
+            <select
+              id="couponType"
+              name="couponType"
+              class="w-full px-4 py-2 border rounded"
+              required
+            >
+              <option value="percentage">Percentage</option>
+              <option value="fixed">Fixed</option>
+            </select>
+            <small id="couponTypeError" class="text-red-500"></small>
+            <!-- Error message -->
+          </div>
+
+          <!-- Discount Value -->
+          <div class="mb-4">
+            <label for="discountValue" class="block text-gray-700"
+              >Discount Value</label
+            >
+            <input
+              type="number"
+              id="discountValue"
+              name="couponValue"
+              class="w-full px-4 py-2 border rounded"
+              required
+              min="0"
+            />
+            <small id="discountValueError" class="text-red-500"></small>
+            <!-- Error message -->
+          </div>
+
+          <!-- Minimum Purchase Amount -->
+          <div class="mb-4">
+            <label for="minPurchaseAmount" class="block text-gray-700"
+              >Minimum Purchase Amount</label
+            >
+            <input
+              type="number"
+              id="minPurchaseAmount"
+              name="minPurchaseAmount"
+              class="w-full px-4 py-2 border rounded"
+              required
+              min="0"
+            />
+            <small id="minPurchaseAmountError" class="text-red-500"></small>
+            <!-- Error message -->
+          </div>
+
+          <!-- Start Date -->
+          <div class="mb-4">
+            <label for="startDate" class="block text-gray-700"
+              >Start Date</label
+            >
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
+              class="w-full px-4 py-2 border rounded"
+              required
+            />
+            <small id="startDateError" class="text-red-500"></small>
+            <!-- Error message -->
+          </div>
+
+          <!-- End Date -->
+          <div class="mb-4">
+            <label for="endDate" class="block text-gray-700">End Date</label>
+            <input
+              type="date"
+              id="endDate"
+              name="expiryDate"
+              class="w-full px-4 py-2 border rounded"
+              required
+            />
+            <small id="endDateError" class="text-red-500"></small>
+            <!-- Error message -->
+          </div>
+
+          <!-- Usage Limit -->
+          <div class="mb-4">
+            <label for="usageLimit" class="block text-gray-700"
+              >Usage Limit</label
+            >
+            <input
+              type="number"
+              id="usageLimit"
+              name="totalUsageLimit"
+              class="w-full px-4 py-2 border rounded"
+              required
+              min="1"
+            />
+            <small id="usageLimitError" class="text-red-500"></small>
+            <!-- Error message -->
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="button"
+            onclick="submitCouponForm()"
+            class="w-full py-2 bg-blue-500 text-white font-semibold rounded"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+      document.getElementById("addCouponBtn").addEventListener("click", () => {
+        document.getElementById("couponFormContainer").classList.add("active");
+      });
+
+      document
+        .getElementById("closeCouponForm")
+        .addEventListener("click", () => {
+          document
+            .getElementById("couponFormContainer")
+            .classList.remove("active");
+        });
+
+      async function submitCouponForm() {
+        // Reset error messages
+        resetErrorMessages();
+
+        const newformData = {
+          code: document.getElementById("couponCode").value.trim(),
+          couponType: document.getElementById("couponType").value.trim(),
+          couponValue: document.getElementById("discountValue").value.trim(),
+          minPurchaseAmount: document
+            .getElementById("minPurchaseAmount")
+            .value.trim(),
+          startDate: document.getElementById("startDate").value.trim(),
+          expiryDate: document.getElementById("endDate").value.trim(),
+          totalUsageLimit: document.getElementById("usageLimit").value.trim(),
+        };
+
+        let formIsValid = true;
+
+        // Validate Coupon Code
+        // Validate Coupon Code (Only Uppercase Alphabets and Numbers, Max Length 15)
+        const couponCodeRegex = /^[A-Z][A-Z0-9]{0,14}$/;
+        if (!newformData.code) {
+          showError("couponCode", "Coupon code is required.");
+          formIsValid = false;
+        } else if (!couponCodeRegex.test(newformData.code)) {
+          showError(
+            "couponCode",
+            "Coupon code must contain only uppercase letters and numbers."
+          );
+          formIsValid = false;
+        } else if (newformData.code.length > 15) {
+          showError("couponCode", "Coupon code cannot exceed 15 characters.");
+          formIsValid = false;
+        }
+        if (newformData.couponValue > 10000) {
+  showError("discountValue", "Coupon value cannot exceed 10,000.");
+  formIsValid = false;
+}
+if (newformData.totalUsageLimit > 5) {
+    showError("usageLimit", "Usage limit  cannot be more than 5.");
+    formIsValid = false;
+  }
+  if (newformData.couponType === "percentage") {
+  // Validate Coupon Value for Percentage Coupon Type
+  if (newformData.couponValue <= 0 || newformData.couponValue > 100) {
+    showError("discountValue", "Coupon value for percentage type must be between 1 and 100.");
+    formIsValid = false;
+  }
+}
+        // Validate Coupon Type
+        if (!newformData.couponType) {
+          showError("couponType", "Coupon type is required.");
+          formIsValid = false;
+        }
+
+        // Validate Discount Value (Must be a positive integer, no decimals)
+        if (
+          !newformData.couponValue ||
+          newformData.couponValue <= 0 ||
+          newformData.couponValue % 1 !== 0
+        ) {
+          showError(
+            "discountValue",
+            "Discount value must be a positive integer."
+          );
+          formIsValid = false;
+        }
+
+        // Validate Minimum Purchase Amount (Must be a positive integer, no decimals)
+        if (
+          !newformData.minPurchaseAmount ||
+          newformData.minPurchaseAmount <= 0 ||
+          newformData.minPurchaseAmount % 1 !== 0
+        ) {
+          showError(
+            "minPurchaseAmount",
+            "Minimum purchase amount must be a positive integer."
+          );
+          formIsValid = false;
+        }
+
+        // Validate Start Date (Must not be in the past)
+        const currentDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
+        if (!newformData.startDate) {
+          showError("startDate", "Start date is required.");
+          formIsValid = false;
+        } else if (newformData.startDate < currentDate) {
+          showError("startDate", "Start date cannot be in the past.");
+          formIsValid = false;
+        }
+
+        // Validate End Date (Must be greater than Start Date)
+        if (!newformData.expiryDate) {
+          showError("endDate", "End date is required.");
+          formIsValid = false;
+        } else if (newformData.expiryDate <= newformData.startDate) {
+          showError("endDate", "End date must be greater than start date.");
+          formIsValid = false;
+        }
+
+        // Validate Usage Limit (Must be a positive integer, no decimals)
+        if (
+          !newformData.totalUsageLimit ||
+          newformData.totalUsageLimit <= 0 ||
+          newformData.totalUsageLimit % 1 !== 0
+        ) {
+          showError("usageLimit", "Usage limit must be a positive integer.");
+          formIsValid = false;
+        }
+
+        if (!formIsValid) {
+          return; // Stop form submission if validation fails
+        }
+
+        try {
+          console.log("Form data before Axios request:", newformData);
+          const response = await axios.post("/admin/coupons", newformData);
+          console.log("Response from server:", response.data);
+          document.getElementById("couponForm").reset();
+          document.getElementById("couponFormContainer").classList.remove("active");
+           await Swal.fire({
+            title: "Coupon added successfully!",
+            icon: "success",
+            confirmButtonText: "Ok",
+          });
+          console.log("hi");
+        
+          window.location.reload();
+        } catch (error) {
+          console.error("Error in Axios request:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Error adding coupon",
+            text: error.response
+              ? error.response.data.message
+              : "An error occurred",
+          });
+        }
+      }
+
+      // Function to show error messages
+      function showError(fieldId, message) {
+        const errorElement = document.getElementById(`${fieldId}Error`);
+        if (errorElement) {
+          errorElement.textContent = message;
+        }
+      }
+
+      // Function to reset error messages
+      function resetErrorMessages() {
+        const errorElements = document.querySelectorAll("small.text-red-500");
+        errorElements.forEach((element) => {
+          element.textContent = "";
+        });
+      }
+    ///---------------> remove coupon
+    async function remove(couponId){
+      Swal.fire({
+        title:"Are you sure you want to  remove this coupon?",
+        icon:'warning',
+        showCancelButton:true,
+        confirmButtonText:'yes',
+        cancelButtonText:'No',
+
+      }).then(async (result)=>{
+        if(result.isConfirmed){
+          try{
+            const response=await axios.post("/admin/removeCoupon",{couponId,});
+            if(response.data.success){
+              Swal.fire({
+                title:'Success',
+                icon:'success',
+                text:'Coupon has been removed successfully',
+                timer:2000
+
+              }).then(()=>{
+                // window.location.reload()
+                const couponElement = document.getElementById(`coupon-${couponId}`);
+            if (couponElement) {
+              couponElement.remove();
+            }
+
+
+              })
+            }else{
+              Swal.fire({
+                title:"error",
+                icon:'error',
+                text:'An error occurred while removing transaction'
+              })
+            }
+          }catch(error){
+            console.error(error);
+            Swal.fire({
+              icon:'error',
+              text:'An error occurred while removing the coupon.',
+            })
+          }
+        }
+      })
+    }
+ // Confirm Block Coupon
+ async function confirmBlock(couponId) {
+        Swal.fire({
+          title: "Are you sure you want to block this coupon?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, block it!",
+          cancelButtonText: "No",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const response = await axios.post("/admin/couponstatusblock", {
+                couponId,
+              });
+              if (response.data.success) {
+                Swal.fire(
+                  "Blocked!",
+                  "Coupon has been blocked.",
+                  "success"
+                ).then(() => {
+                  // Reloads the page to reflect changes
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire("Error", response.data.message, "error");
+              }
+            } catch (error) {
+              console.error(error);
+              Swal.fire(
+                "Error",
+                "An error occurred while blocking the coupon.",
+                "error"
+              );
+            }
+          }
+        });
+      }
+
+     
+
+      // Confirm Unblock Coupon
+      async function confirmUnblock(couponId) {
+        Swal.fire({
+          title: "Are you sure you want to unblock this coupon?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, unblock it!",
+          cancelButtonText: "No",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const response = await axios.post("/admin/couponstatusUnblock", {
+                couponId,
+              });
+              if (response.data.success) {
+                Swal.fire(
+                  "Unblocked!",
+                  "Coupon has been unblocked.",
+                  "success"
+                ).then(() => {
+                  // Reloads the page to reflect changes
+                  window.location.reload();
+                });
+              } else {
+                Swal.fire("Error", response.data.message, "error");
+              }
+            } catch (error) {
+              console.error(error);
+              Swal.fire(
+                "Error",
+                "An error occurred while unblocking the coupon.",
+                "error"
+              );
+            }
+          }
+        });
+      }
+      ///------>edit coupon
+      async function editCoupon(couponId){
+        
+      }
+           
+    </script>
+  </body>
+</html>

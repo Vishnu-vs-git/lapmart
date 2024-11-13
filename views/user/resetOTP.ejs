@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <script>
+        // Initialize countdown time (2 minutes = 120 seconds)
+        let timeLeft = 60;
+
+        function startTimer() {
+            const timerDisplay = document.getElementById("timer");
+            const resendButton = document.getElementById("resendOtpBtn");
+
+            const timerInterval = setInterval(() => {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+
+                // Display the countdown
+                timerDisplay.innerHTML = `Time remaining: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+                // Decrement the time
+                timeLeft--;
+
+                // When time runs out
+                if (timeLeft < 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.innerHTML = "OTP expired!";
+                    resendButton.disabled = false; // Enable the Resend OTP button after expiration
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            startTimer(); // Start the timer when the page loads
+        };
+    </script>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <!-- Include Header Partial -->
+    <%-include('../partials/header') %>
+
+    <!-- Include Navbar Partial -->
+    <%-include('../partials/navbar') %>
+
+    <!-- Main Container for OTP Verification Form -->
+    <div class="flex-grow flex items-center justify-center p-4">
+        <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-sm border-4 border-black">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-900">OTP Verification</h2>
+
+            <!-- Display any messages (e.g., error, success) -->
+            <% if (msg) { %>
+                <div class="mb-4 text-red-500 text-sm text-center">
+                    <%= msg %>
+                </div>
+            <% } %>
+
+            <!-- OTP Verification Form -->
+            <form action="/user/verify-ResetOtp" method="POST">
+                <div class="mb-4">
+                    <label for="otp" class="block text-sm font-medium text-gray-600">Enter OTP</label>
+                    <input type="text" id="otp" name="otp" required class="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-purple-500">
+                </div>
+
+                <button type="submit" class="w-full bg-black text-white font-bold p-2 rounded-md">Verify OTP</button>
+            </form>
+
+            <!-- Timer Display -->
+            <p id="timer" class="text-center mt-4 text-red-600 font-semibold">Time remaining: 2:00</p>
+
+            <!-- Resend OTP Option -->
+            <div class="mt-4 text-center">
+                <form action="/user/resendPasswordResetOtp" method="post">
+                    <button type="submit" id="resendOtpBtn" class="text-sm text-purple-600 hover:underline" disabled>Resend OTP</button>
+                </form>
+            </div>
+
+            <!-- Link to Login -->
+            <div class="mt-4 text-center">
+                <a href="/user/login" class="text-sm text-purple-600 hover:underline">Back to Login</a>
+            </div>
+        </div>
+    </div>
+    <!-- Include Footer Partial -->
+    <%-include('../partials/footer') %>
+</body>
+</html>

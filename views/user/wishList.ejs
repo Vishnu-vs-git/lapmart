@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wishlist</title>
+  <!-- Include Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+  href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+  rel="stylesheet">
+</head>
+<body class="flex flex-col min-h-screen bg-gray-100">
+
+  <!-- Include Header Partial -->
+  <%- include('../partials/loggedheader') %>
+
+  <!-- Include Navbar Partial -->
+  <%- include('../partials/navbar') %>
+
+  <!-- Wishlist Section -->
+  <div class="container mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold mb-6 text-center">My Wishlist</h2>
+
+    <!-- Wishlist Items Row Layout -->
+    <div class="space-y-4 max-w-2xl mx-auto">
+      <% wishlistItems.forEach(item => { %>
+        <div class="bg-white shadow-md rounded-md flex flex-row items-center overflow-hidden transform transition hover:scale-105 duration-300 p-3">
+          
+          <!-- Product Image and Details under Image -->
+          <div class="w-1/4 flex flex-col items-center space-y-1">
+            <img src="<%= item.productId.images[0] %>" alt="<%= item.productId.name %>" class="w-full h-36 object-contain">
+            
+            <!-- Price and Discount -->
+            <div class="flex flex-col items-center">
+              <p class="text-lg font-bold text-green-600">₹<%= item.productId.finalPrice ? item.productId.finalPrice : item.productId.price %></p>
+              <% if (item.productId.discountValue > 0) { %>
+                <span class="text-xs line-through text-gray-400">₹<%= item.productId.price %></span>
+                <span class="text-xs text-red-500">(<%= item.productId.discountValue %>% off)</span>
+              <% } %>
+            </div>
+
+            <!-- Ratings -->
+            <div class="flex items-center">
+              <% for (let i = 1; i <= 5; i++) { %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400 <%= i <= item.productId.rating ? 'fill-current' : 'text-gray-300' %>" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.669 5.11h5.376c.969 0 1.371 1.24.588 1.81l-4.342 3.156 1.669 5.109c.3.92-.755 1.688-1.54 1.106L10 15.347l-4.342 3.157c-.784.582-1.84-.186-1.54-1.106l1.669-5.11L1.444 9.846c-.784-.57-.38-1.81.588-1.81h5.376l1.669-5.109z"/>
+                </svg>
+              <% } %>
+              <span class="ml-1 text-gray-600 text-xs"><%= item.productId.rating %> / 5</span>
+            </div>
+          </div>
+          
+          <!-- Product Details -->
+          <div class="p-3 w-3/4 space-y-1">
+            <h3 class="text-md font-semibold text-gray-800"><%= item.productId.name %></h3>
+            <ul class="text-gray-500 list-disc list-inside text-sm">
+              <% item.productId.description.split(',').forEach(desc => { %>
+                <li><%= desc.trim() %></li>
+              <% }) %>
+            </ul>
+
+            <!-- Add to Cart Button -->
+            <button onclick="addToCart('<%= item.productId._id %>')"
+              class="mt-2 bg-blue-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-blue-600 transition duration-200 text-sm">
+              Add to Cart
+            </button>
+
+            <!-- Buy Now Button -->
+            <button onclick="buyNow('<%= item.productId._id %>')"
+              class="mt-2 bg-green-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-green-600 transition duration-200 text-sm">
+              Buy Now
+            </button>
+
+            <!-- Remove Button -->
+            <button onclick="removeFromWishlist('<%= item.productId._id %>')"
+              class="mt-2 bg-red-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-red-600 transition duration-200 text-sm">
+              Remove
+            </button>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    async function removeFromWishlist(productId) {
+      try {
+        const response = await axios.post('/user/removeWishlist', { productId });
+        if (response) {
+          Swal.fire({
+            title: 'Success!',
+            text: 'Product has been removed from wishlist',
+            icon: 'success',
+            iconColor: '#4CAF50',
+            showConfirmButton: false,
+            timer: 3000,
+            customClass: {
+              popup: 'rounded-alert',
+              icon: 'custom-icon',
+              title: 'custom-title',
+            }
+          }).then(() => {
+            location.reload();
+          });
+        }
+      } catch (error) {
+        console.error('Error removing from wishlist', error);
+      }
+    }
+
+    async function addToCart(productId) {
+      try {
+        const response = await axios.post('/user/addCart', { productId,quantity:1 });
+        if (response) {
+          Swal.fire({
+            title: 'Added to Cart!',
+            text: 'Product has been added to your cart',
+            icon: 'success',
+            iconColor: '#4CAF50',
+            showConfirmButton: false,
+            timer: 3000,
+          });
+        }
+      } catch (error) {
+        console.error('Error adding to cart', error);
+      }
+    }
+
+    async function buyNow(productId) {
+      try {
+        const response = await axios.post('/user/addCart', { productId });
+        if (response) {
+          window.location.href = '/user/cart'; // Redirect to cart page
+        }
+      } catch (error) {
+        console.error('Error in Buy Now process', error);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/css/elevatezoom.css">
+    <title><%= product.name %></title>
+    <style>
+        /* Styles for zoom lens */
+        .zoomed-image {
+            position: absolute;
+            border: 1px solid #000;
+            display: none; /* Start hidden */
+            width: 300px; /* Size of the zoomed image */
+            height: 300px; /* Size of the zoomed image */
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            top: 0; /* Adjust based on your layout */
+            left: 110%; /* Adjust based on your layout */
+        }
+        
+        .break {
+            background: #15B320;
+        }
+        .break2 {
+            background: hsl(41, 71%, 52%);
+        }
+        .break3 {
+            background: #FFF5E4;
+        }
+    
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Include Header Partial -->
+    <%- include('../partials/loggedheader') %>
+
+    <!-- Include Navbar Partial -->
+    <%- include('../partials/navbar') %>
+
+    <div class="font-sans bg-white">
+        <div class="p-4 lg:max-w-7xl max-w-4xl mx-auto">
+            <!-- Breadcrumbs -->
+            <nav class="bg-gray-100 p-4 rounded-md mb-8">
+                <ol class="list-reset flex">
+                  <% breadcrumbs.forEach((crumb, index) => { %>
+                    <li>
+                      <% if (index < breadcrumbs.length - 1) { %>
+                        <a href="<%= crumb.url %>" class="text-blue-600 hover:text-blue-800"><%= crumb.name %></a>
+                        <span class="mx-2">></span>
+                      <% } else { %>
+                        <span class="text-gray-600"><%= crumb.name %></span>
+                      <% } %>
+                    </li>
+                  <% }) %>
+                </ol>
+              </nav>
+
+            <div class="grid items-start grid-cols-1 lg:grid-cols-5 gap-12 shadow-lg p-6 rounded-lg">
+                <div class="lg:col-span-3 w-full lg:sticky top-0 text-center">
+                    <div class="px-2 py-4 rounded-lg shadow-lg relative">
+                        
+                        
+                        <img id="mainImage" src="<%= product.images[0] %>" alt="<%= product.name %>" class="w-3/4 h-auto mx-auto rounded object-fit" data-zoom-image="<%= product.images[0] %>" />
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap justify-center gap-6 mx-auto">
+                        <% product.images.forEach(function(image) { %>
+                        <div class="w-24 h-20 flex items-center justify-center rounded-lg p-4 shadow-md cursor-pointer thumbnail">
+                            <img src="<%= image %>" alt="<%= product.name %>" class="w-full h-full object-cover rounded" data-image="<%= image %>" />
+                        </div>
+                        <% }) %>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <h2 class="text-2xl font-extrabold text-gray-800"><%= product.name %></h2>
+
+                    <div class="flex flex-wrap gap-4 mt-8">
+                       
+                        <% if (product.discountValue > 0) { %>
+                            <p class="text-gray-800 text-3xl font-bold">₹<%= product.finalPrice %></p>
+                           
+                            <span class="text-green-500 line-through font-semibold">₹<%= product.price %></span>
+                            (<%= product.discountType === 'percentage' ? product.discountValue + '%' : '₹' + product.discountValue %> OFF)
+                        </p>
+                        <% } else{ %>
+                    </div>
+                    <p class="text-gray-800 text-3xl font-bold">₹<%= product.price %></p>
+                    <% } %>
+                   <!-- Stock Details -->
+                   <div class="mt-4">
+                    <div class="flex">
+                        <p class="text-gray-800 text-lg font-extrabold">
+                            <span class="<%= product.quantity > 0 ? 'text-green-500' : 'text-red-500' %>">
+                                <%= product.quantity > 0 ? `In stock (${product.quantity} left)` : 'Out of stock' %>
+                            </span>
+                        </p>
+                    </div>
+                
+                    <div class="flex items-center mt-2">
+                        <% for (let i = 0; i < 5; i++) { %>
+                            <i class="fas fa-star <%= i < Math.round(product.rating) ? 'text-yellow-500' : 'text-gray-400' %> ml-1"></i>
+                        <% } %>
+                        <p class="text-sm text-gray-800 ml-2"><%= product.rating %> (1 review)</p>
+                    </div>
+                
+                    <div class="mt-8">
+                        <h3 class="text-xl font-bold text-gray-800">Choose a Color</h3>
+                        <div class="flex flex-wrap gap-3 mt-4">
+                            <% product.color.forEach(function(color) { %>
+                                <button type="button" class="w-10 h-10 bg-<%= color %> border-2 border-black hover:border-gray-800 rounded-full"></button>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+                
+
+                    <!-- Product Description -->
+                    <div class="mt-4">
+                        <h3 class="text-xl font-bold text-gray-800">Description</h3>
+                        <ul class="list-disc list-inside text-gray-700 mt-2">
+                            <% product.description.split(',').forEach(function(desc) { %>
+                            <li><%= desc.trim() %></li>
+                            <% }) %>
+                        </ul>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 mt-4 w-full">
+                        <form id="addToCartForm" class="w-full">
+                            <input type="hidden" name="productId" value="<%= product._id %>">
+                            <input type="number" name="quantity" value="1" min="1" class="hidden" required>
+                            <% if (product.quantity > 0) { %>
+                                <button type="button" id="addToCartButton" class="w-full min-w-[200px] px-4 py-2.5 rounded-2xl border border-blue-600 bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors duration-200">Add to Cart</button>
+                              <% } else { %>
+                                <button id="addToCartButtons" onclick="warningMessage(event)"    class="  w-full min-w-[200px] px-4 py-2.5 rounded-2xl border border-red-600 bg-transparent text-gray-900 font-bold hover:bg-red-600 hover:text-white transition-colors duration-200"  >Add to Cart</button>
+                              <% } %>
+                           
+                         
+                        </form>
+                        <button type="button" class="w-full min-w-[200px] px-4 py-2.5 rounded-2xl border border-green-600 bg-transparent text-blue-600 font-bold hover:bg-green-600 hover:text-white transition-colors duration-200">
+                            Buy Now
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Specifications -->
+            <div class="mt-16 shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800">Product Information</h3>
+                <ul class="mt-4 space-y-6 text-gray-800">
+                    <li class="text-sm">Brand: <span class="ml-4 float-right"><%= product.category %></span></li>
+                    <li class="text-sm">Processor: <span class="ml-4 float-right"><%= product.processor %></span></li>
+                    <li class="text-sm">Storage Type: <span class="ml-4 float-right"><%= product.storageType %></span></li>
+                    <li class="text-sm">Operating System: <span class="ml-4 float-right"><%= product.operatingSystem %></span></li>
+                    <li class="text-sm">Touch Screen: <span class="ml-4 float-right"><%= product.touchScreen %></span></li>
+                    <li class="text-sm">Graphics Type: <span class="ml-4 float-right"><%= product.graphicsType %></span></li>
+                    <li class="text-sm">Weight: <span class="ml-4 float-right"><%= product.weight %></span></li>
+                </ul>
+            </div>
+
+            <!-- Key Features Section -->
+            <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold text-gray-800">Key Features:</h3>
+                <ul class="mt-4 list-disc list-inside text-gray-700">
+                    <% product.keyFeatures.forEach(function(feature) { %>
+                    <li><%= feature %></li>
+                    <% }) %>
+                </ul>
+            </div>
+
+            <!-- Review System -->
+            <div class="mt-16 shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800">Reviews</h3>
+                <div class="mt-4">
+                    <div class="flex items-center">
+                        <p class="text-sm text-gray-800 font-bold">4.0</p>
+                        <i class="fas fa-star text-yellow-500 ml-1"></i>
+                        <p class="text-sm text-gray-800 font-bold ml-3">1 review</p>
+                    </div>
+                    <p class="text-sm mt-4 text-gray-800">"Okay that all I can say about this product."</p>
+                </div>
+
+                <!-- Review Form -->
+                <h4 class="mt-6 text-lg font-bold text-gray-800">Submit a Review:</h4>
+                <form class="mt-4">
+                    <textarea class="border rounded w-full p-2" rows="4" placeholder="Your Review"></textarea>
+                    <div class="flex justify-between items-center mt-4">
+                        <div class="flex items-center">
+                            <span class="text-sm text-gray-700">Rate:</span>
+                            <select class="ml-2 border rounded p-2">
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="font-[sans-serif] p-4 mx-auto lg:max-w-5xl md:max-w-3xl max-w-lg">
+        <h2 class="text-4xl font-extrabold text-gray-800 mb-12">Similar Products</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          
+          <% relatedProducts.forEach(product => { %>
+          <div class="bg-white overflow-hidden cursor-pointer hover:shadow-lg transition-all relative rounded-lg flex flex-col">
+            <!-- Wishlist Icon -->
+            <div class="absolute top-4 right-6text-gray-500 hover:text-red-500 transition duration-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            </div>
+        
+            <!-- Product Image -->
+            <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="w-full h-48 object-fit" />
+        
+            <!-- Product Details -->
+            <div class="p-6 flex-grow flex flex-col justify-between">
+              <div>
+                <hr class="border-2 mb-4" />
+        
+                <!-- Product Name with fixed height for alignment -->
+                <h3 class="text-base text-gray-800 font-semibold h-18 overflow-hidden leading-tight"><%= product.name %></h3>
+        
+                <!-- Price with fixed height for alignment -->
+                <h4 class="text-xl text-gray-800 font-bold mt-2 mb-4">₹<%= product.price %></h4>
+              </div>
+        
+              <!-- Rating and Reviews with consistent height -->
+              <div class="flex items-center space-x-1.5 mt-4 mb-4 h-8">
+                <% for (let i = 0; i < 5; i++) { %>
+                  <svg class="w-4 <%= i < product.rating ? 'fill-[#facc15]' : 'fill-[#CED5D8]' %>" viewBox="0 0 14 13">
+                    <path d="M7 0L9.4687 3.60213L13.6574 4.83688L10.9944 8.29787L11.1145 12.6631L7 11.2L2.8855 12.6631L3.00556 8.29787L0.342604 4.83688L4.5313 3.60213L7 0Z" />
+                  </svg>
+                <% } %>
+                <p class="text-base text-gray-800 ml-2"><%= product.reviews %> reviews</p>
+              </div>
+        
+              <!-- View Details Button -->
+              <button class="mt-auto w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-md transition duration-200">
+                <a href="/user/products/<%= product._id %>">View Details</a>
+               
+              </button>
+            </div>
+          </div>
+          <% }) %>
+        
+        </div>
+      </div>
+      
+      
+    <!-- Include Footer Partial -->
+    <%- include('../partials/footer') %>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/3.0.8/jquery.elevatezoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        $(document).ready(function () {
+            $('#mainImage').elevateZoom({
+                zoomType: "window",
+                lensShape: "square",
+                lensSize: 200,
+                scrollZoom:true,
+                cursor: 'crosshair',
+                easing: 'swing'
+            });
+
+            $('.thumbnail img').on('click', function () {
+                var newImage = $(this).data('image');
+                $('#mainImage')
+                    .attr('src', newImage)
+                    .data('zoom-image', newImage) // Update the zoom image
+                    .elevateZoom('destroy') // Destroy the current instance
+                    .elevateZoom({ // Reinitialize the zoom
+                        zoomType: "lens",
+                        lensShape: "round",
+                        lensSize: 200,
+                    });
+            });
+        });
+    </script>
+    <script>
+       document.getElementById("addToCartButton").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const form = document.getElementById("addToCartForm");
+    const formData = new FormData(form);
+    const data = {
+        productId: formData.get("productId"),
+        quantity: parseInt(formData.get("quantity"), 10),
+    };
+
+    try {
+        const response = await fetch("/addCart", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+       
+        if(result){
+            Swal.fire({
+                    icon:'success',
+                    text:'product added to cart successfully',
+                    showCancelButton:false,
+                    timer:3000
+
+                })
+        }
+        
+        
+        
+        
+        // Log response or handle accordingly
+    } catch (error) {
+        console.error("Error adding to cart:", error);
+        
+    }
+});
+        function warningMessage(e){
+                e.preventDefault();
+                Swal.fire({
+                    icon:'warning',
+                    text:'product is currently unavailable',
+                    showCancelButton:false,
+                    timer:3000
+
+                })
+          
+        }
+
+    </script>
+    
+</body>
+
+</html>

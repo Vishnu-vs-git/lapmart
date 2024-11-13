@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <title>All Products</title>
+    <style>
+        /* Rounded alert popup */
+.rounded-alert {
+  border-radius: 15px; /* Rounded corners */
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); /* Soft shadow */
+  padding: 20px; /* Additional padding */
+}
+
+/* Custom icon styling */
+.custom-icon {
+  color: #4CAF50; /* Green color */
+}
+
+/* Custom title styling */
+.custom-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333; /* Dark color for modern look */
+}
+
+/* Custom button styling */
+.custom-button {
+  background-color: #4CAF50 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  padding: 10px 20px !important;
+  font-weight: bold;
+}
+
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Include Header Partial -->
+    <%- include('../partials/loggedheader') %>
+
+    <!-- Include Navbar Partial -->
+    <%- include('../partials/navbar') %>
+
+    <!-- Breadcrumbs -->
+    <nav class="bg-gray-100 p-4 rounded-md mb-8">
+        <ol class="list-reset flex">
+          <% breadcrumbs.forEach((crumb, index) => { %>
+            <li>
+              <% if (index < breadcrumbs.length - 1) { %>
+                <a href="<%= crumb.url %>" class="text-blue-600 hover:text-blue-800"><%= crumb.name %></a>
+                <span class="mx-2">></span>
+              <% } else { %>
+                <span class="text-gray-600"><%= crumb.name %></span>
+              <% } %>
+            </li>
+          <% }) %>
+        </ol>
+    </nav>
+    <!-- Sorting Dropdown -->
+   <!-- Sorting Dropdown -->
+
+    <div class="relative inline-block w-64 ml-3">
+      <!-- Custom Select Container -->
+      <select   id="sort-options"  class="w-full appearance-none bg-white text-gray-800 py-3 px-4 pr-8 rounded-xl border-2 border-violet-100 hover:border-violet-200 focus:border-violet-500 focus:ring focus:ring-violet-200 focus:ring-opacity-50 shadow-sm hover:shadow transition-all duration-300 cursor-pointer text-sm font-medium">
+        <option value="" class="py-2">Sort by</option>
+       <!-- <option value="popularity" class="py-2">Popularity</option> -->
+        <option value="priceAsc" class="py-2">Price: Low to High</option>
+        <option value="priceDesc" class="py-2">Price: High to Low</option>
+        <!-- <option value="rating" class="py-2">Average Ratings</option> -->
+        <option value="featured" class="py-2">Featured</option>
+        <option value="newArrivals" class="py-2">New Arrivals</option>
+        <option value="aToZ" class="py-2">A-Z</option>
+        <option value="zToA" class="py-2">Z-A</option>
+      </select>
+      
+      <!-- Custom Arrow -->
+      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+        <svg class="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+      
+    <main   id="product-list" class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="allProductsContainer">
+            <% products.forEach(product => { %>
+                <% 
+                    let discountedPrice;
+                    if (product.discountType === 'fixed') {
+                        discountedPrice = product.price - product.discountValue;
+                    } else if (product.discountType === 'percentage') {
+                        discountedPrice = product.price - (product.price * product.discountValue / 100);
+                    } else {
+                        discountedPrice = product.price; // No discount
+                    }
+                %>
+                <div class="bg-white shadow-md rounded-lg overflow-hidden flex flex-col h-full relative">
+                    <!-- Wishlist Icon positioned absolutely within the product card -->
+                    <div class="absolute top-4 right-4 text-gray-500 hover:text-red-500 transition duration-200 cursor-pointer" onclick="addToWishlist('<%= product._id %>')">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    </div>
+                    
+                    <!-- Set fixed height and use object-cover to maintain aspect ratio -->
+                    <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="w-full h-80 object-fit">
+                    <div class="p-4 flex flex-col justify-between flex-grow">
+                        <!-- Product Name with a fixed height for consistency -->
+                        <h2 class="text-lg font-semibold h-16"><%= product.name %></h2>
+
+                        <!-- Display Price and Discounted Price -->
+                        <% if (product.discountValue > 0) { %>
+                            <div class="text-gray-700">
+                                <p>Price: <span class="line-through">₹<%= product.price %></span></p>
+                                <p>
+                                    Offer Price: 
+                                    <span class="text-green-500 font-semibold">₹<%= product.finalPrice %></span>
+                                    (<%= product.discountType === 'percentage' ? product.discountValue + '%' : '₹' + product.discountValue %> OFF)
+                                </p>
+                            </div>
+                        <% } else { %>
+                            <p class="text-gray-700">Price: ₹<%= product.price %></p>
+                        <% } %>
+
+                        <p class="text-gray-500">Rating: <%= product.rating %> / 5</p>
+
+                        <!-- "View Details" button at the bottom -->
+                        <div class="mt-4">
+                            <a href="/products/<%= product.id %>" class="inline-block bg-blue-500 text-white rounded px-4 py-2 text-center w-full">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </main>
+
+    <!-- Pagination Controls -->
+    <div class="flex justify-center mt-6 mb-8">
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>&limit=9" class="bg-white shadow-md p-2 mx-1 rounded-lg">PREV</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="?page=<%= i %>&limit=9" class="<%= i === currentPage ? 'bg-gray-700 text-white' : 'bg-white' %> shadow-md px-4 py-2 mx-1 rounded-lg">
+                <%= i %>
+            </a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>&limit=9" class="bg-white shadow-md p-2 mx-1 rounded-lg">NEXT</a>
+        <% } %>
+    </div>
+    <!-- Include Footer Partial -->
+    <%- include('../partials/footer') %>
+    
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.getElementById('sort-options').addEventListener('change', function() {
+        const selectedSort = this.value;
+
+        window.location.href= `/user/products?sort=${selectedSort}`;
+        // axios.get(`/user/products?sort=${selectedSort}`)
+        //     .then(response => {
+        //         // Replace the product list with sorted products
+        //         document.getElementById('product-list').innerHTML = response.data;
+        //     })
+        //     .catch(error => {
+        //         console.error('Error fetching sorted products:', error);
+        //     });
+    });
+    
+</script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+ function addToWishlist(productId) {
+    axios.post('/user/addWishlist', { productId: productId })
+        .then(response => {
+            // Check for success or already added condition
+            console.log("Response data:", response.data);
+            if (response.data.success) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.data.message || 'Product has been added to wishlist successfully.',
+                    icon: 'success',
+                    iconColor: '#4CAF50',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: 'rounded-alert',
+                        icon: 'custom-icon',
+                        title: 'custom-title',
+                        confirmButton: 'custom-button'
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: response.data.message || 'Product is already in wishlist!',
+                    icon: 'warning',
+                    iconColor: '#FF9800',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: 'rounded-alert',
+                        icon: 'custom-icon',
+                        title: 'custom-title',
+                        confirmButton: 'custom-button'
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error adding to wishlist:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                iconColor: '#F44336',
+                timer: 3000,
+                showConfirmButton: false
+            });
+        });
+}
+
+</script>
+
+
+  
+</body>
+</html>

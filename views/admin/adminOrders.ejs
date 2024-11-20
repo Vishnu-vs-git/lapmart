@@ -9,8 +9,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-[#000000] text-white">
-    <div class="flex h-screen">
+<body class="bg-gray-800 text-white">
+    <div class="flex h-screen bg">
         <%- include('../partials/adminSidebar') %>
         <!-- Main Content -->
         <div class="flex-1 p-8">
@@ -21,8 +21,8 @@
 
             <div class="bg-gray-800 shadow-md rounded my-6">
                 <table class="w-full table-auto">
-                    <thead>
-                        <tr class="bg-white text-black uppercase text-sm leading-normal">
+                    <thead class="bg-white text-black uppercase text-sm leading-normal rounded-2xl">
+                        <tr>
                             <th class="py-3 px-6 text-left">Order ID</th>
                             <th class="py-3 px-6 text-left">Customer</th>
                             <th class="py-3 px-6 text-left">Items & Status</th>
@@ -42,23 +42,15 @@
                                     <ul class="list-none">
                                         <% order.items.forEach(item => { 
                                             let statusColor;
-                                            let textColor;
                                             switch(item.itemOrderStatus) {
-                                                case 'Pending':
-                                                    statusColor = 'bg-yellow-300 text-gray-800';
-                                                    break;
-                                                case 'Shipped':
-                                                    statusColor = 'bg-green-300 text-gray-800';
-                                                    break;
-                                                case 'Delivered':
-                                                    statusColor = 'bg-green-500 text-white';
-                                                    break;
-                                                case 'Cancelled':
-                                                case 'return':
-                                                    statusColor = 'bg-red-300 text-gray-800';
-                                                    break;
-                                                default:
-                                                    statusColor = 'bg-gray-500 text-gray-800';
+                                                case 'Pending': statusColor = 'bg-yellow-300 text-gray-800'; break;
+                                                case 'Shipped': statusColor = 'bg-green-300 text-gray-800'; break;
+                                                case 'Delivered': statusColor = 'bg-green-500 text-white'; break;
+                                                case 'Cancelled': statusColor = 'bg-red-300 text-gray-800'; break;
+                                                case 'Return Requested': statusColor = 'bg-yellow-400 text-gray-800'; break;
+                                                case 'Return Approved': statusColor = 'bg-green-500 text-white'; break;
+                                                case 'Rejected': statusColor = 'bg-red-500 text-white'; break;
+                                                default: statusColor = 'bg-gray-500 text-gray-800';
                                             }
                                         %>
                                             <li class="mb-2 flex justify-between items-center">
@@ -67,17 +59,29 @@
                                                     <span class="py-1 px-2 rounded-full text-xs <%= statusColor %>">
                                                         <%= item.itemOrderStatus %>
                                                     </span>
-                                                    <form action="/admin/changeOrderstatus" method="POST" class="flex items-center space-x-2">
-                                                        <input type="hidden" name="orderId" value="<%= order._id %>">
-                                                        <input type="hidden" name="productId" value="<%= item.productId._id %>">
-                                                        <select name="newStatus" onchange="updateStatusOptions(this)" class="bg-gray-700 text-gray-400 rounded p-1">
-                                                            <option value="Pending" <%= item.itemOrderStatus === 'Shipped' || item.itemOrderStatus === 'Delivered' ? 'disabled' : '' %>>Pending</option>
-                                                            <option value="Shipped" <%= item.itemOrderStatus === 'Delivered' ? 'disabled' : '' %>>Shipped</option>
-                                                            <option value="Delivered">Delivered</option>
-                                                            <option value="Cancelled">Cancelled</option>
-                                                        </select>
-                                                        <button type="submit" class="bg-blue-500 text-white py-1 px-2 rounded text-xs hover:bg-blue-600">Change Status</button>
-                                                    </form>
+                                                    <% if (item.itemOrderStatus === 'return requested') { %>
+                                                        <!-- Action on Return Button -->
+                                                        <button onclick="openReturnModal('<%= order._id %>', '<%= item.productId.name %>', '<%= item.returnReason %>', '<%= item.productId._id %>', '<%= order.userId._id %>')" 
+                                                                class="bg-yellow-500 text-black py-1 px-2 rounded text-xs hover:bg-yellow-600">
+                                                            Action on Return
+                                                        </button>
+                                                    <% } else { %>
+                                                        <!-- Status Change Form -->
+                                                        <form action="/admin/changeOrderstatus" method="POST" class="flex items-center space-x-2">
+                                                            <input type="hidden" name="orderId" value="<%= order._id %>">
+                                                            <input type="hidden" name="productId" value="<%= item.productId._id %>">
+                                                            <input type="hidden" name="userId" value="<%= order.userId._id %>">
+                                                            <% if (item.itemOrderStatus !== 'returned') { %>
+                                                                <select name="newStatus" class="bg-gray-700 text-gray-400 rounded p-1">
+                                                                    <option value="Pending" <%= ['Shipped', 'Delivered', 'Cancelled', 'return requested', 'returned'].includes(item.itemOrderStatus) ? 'disabled' : '' %>>Pending</option>
+                                                                    <option value="Shipped" <%= ['Delivered', 'Cancelled', 'return requested', 'returned'].includes(item.itemOrderStatus) ? 'disabled' : '' %>>Shipped</option>
+                                                                    <option value="Delivered" <%= ['Cancelled', 'return requested', 'returned'].includes(item.itemOrderStatus) ? 'disabled' : '' %>>Delivered</option>
+                                                                    <option value="Cancelled" <%= ['Delivered', 'return requested', 'returned'].includes(item.itemOrderStatus) ? 'disabled' : '' %>>Cancelled</option>
+                                                                </select>
+                                                                <button type="submit" class="bg-blue-500 text-white py-1 px-2 rounded text-xs hover:bg-blue-600">Change Status</button>
+                                                            <% } %>
+                                                        </form>
+                                                    <% } %>
                                                 </div>
                                             </li>
                                         <% }); %>
@@ -118,19 +122,51 @@
         </div>
     </div>
 
+    <!-- Modern Return Modal -->
+    <div id="returnModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-8 w-96 shadow-lg relative">
+            <button onclick="closeReturnModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <span class="material-icons">close</span>
+            </button>
+            <h2 class="text-2xl text-gray-800 font-semibold text-center mb-4">Return Request</h2>
+            <p class="mb-4 text-gray-700 text-center">
+                <strong>Order ID:</strong> <span id="modalOrderId" class="font-medium text-gray-900"></span>
+            </p>
+            <p class="mb-6 text-gray-700 text-center">
+                <strong>Return Reason:</strong> <span id="modalReturnReason" class="font-medium text-gray-900"></span>
+            </p>
+            <div class="flex justify-center space-x-4">
+                <form action="/admin/acceptReturn" method="POST">
+                    <input type="hidden" name="orderId" id="acceptOrderId">
+                    <input type="hidden" name="productId" id="acceptProductId">
+                    <input type="hidden" name="userId" id="acceptUserId">
+                    <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-4 rounded hover:bg-green-700">Accept Return</button>
+                </form>
+                <form action="/admin/rejectReturn" method="POST">
+                    <input type="hidden" name="orderId" id="rejectOrderId">
+                    <input type="hidden" name="productId" id="rejectProductId">
+                    <input type="hidden" name="userId" id="rejectUserId">
+                    <button type="submit" class="bg-red-600 text-white font-semibold py-2 px-4 rounded hover:bg-red-700">Reject Return</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function updateStatusOptions(selectElement) {
-            const options = selectElement.options;
-            for (let i = 0; i < options.length; i++) {
-                options[i].disabled = false; // Reset disabled state
-            }
-            
-            if (selectElement.value === 'Shipped') {
-                options[0].disabled = true; // Disable "Pending"
-            } else if (selectElement.value === 'Delivered') {
-                options[0].disabled = true; // Disable "Pending"
-                options[1].disabled = true; // Disable "Shipped"
-            }
+        function openReturnModal(orderId, productName, returnReason, productId, userId) {
+            document.getElementById('modalOrderId').innerText = orderId;
+            document.getElementById('modalReturnReason').innerText = returnReason;
+            document.getElementById('acceptOrderId').value = orderId;
+            document.getElementById('acceptProductId').value = productId;
+            document.getElementById('acceptUserId').value = userId;
+            document.getElementById('rejectOrderId').value = orderId;
+            document.getElementById('rejectProductId').value = productId;
+            document.getElementById('rejectUserId').value = userId;
+            document.getElementById('returnModal').classList.remove('hidden');
+        }
+
+        function closeReturnModal() {
+            document.getElementById('returnModal').classList.add('hidden');
         }
     </script>
 </body>

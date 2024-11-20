@@ -70,17 +70,22 @@
 
                     <div class="flex justify-between mt-2">
                         <span>Discount:</span>
-                        <span id="discount">₹<%= discount.toFixed(2) %></span>
+                        <span id="discount">₹<%= totalDiscount.toFixed(2) %></span>
                     </div>
 
                     <div class="flex justify-between mt-2">
                         <span>Delivery Charge:</span>
                         <span>Free</span>
                     </div>
+                  <div class="flex justify-between mt-2">
+    <span>Tax (18%):</span>
+    <span><%= tax %></span>
+</div>
+
 
                     <div class="flex justify-between mt-4 font-bold">
                         <span>Total:</span>
-                        <span id="total">₹<%= (subtotal +0).toFixed(2) %></span>
+                        <span id="total">₹<%= (grandTotal +0).toFixed(2) %></span>
                     </div>
 
                     <button class="mt-6 w-full bg-green-500 text-white px-4 py-2 rounded" onclick="proceedToCheckout()">Proceed to Checkout</button>

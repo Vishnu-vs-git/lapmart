@@ -26,7 +26,7 @@
         <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
 
         <!-- Filter Section -->
-        <form id="filterForm" action="/admin/sales-report" method="GET" class="bg-white p-4 shadow rounded-md mb-6">
+        <form id="filterForm" action="/admin/salesReport" method="GET" class="bg-white p-4 shadow rounded-md mb-6">
             <div class="flex flex-wrap gap-4">
                 <div class="flex flex-col">
                     <label for="startDate" class="text-sm font-semibold">Start Date</label>
@@ -59,11 +59,11 @@
             </div>
             <div class="bg-white shadow rounded-md p-4">
                 <h2 class="text-lg font-semibold">Total Sales Amount</h2>
-                <p class="text-2xl font-bold">$<%= totalSalesAmount.toFixed(2) %></p>
+                <p class="text-2xl font-bold">₹<%= totalSalesAmount.toFixed(2) %></p>
             </div>
             <div class="bg-white shadow rounded-md p-4">
                 <h2 class="text-lg font-semibold">Total Discount</h2>
-                <p class="text-2xl font-bold">$<%= totalDiscount.toFixed(2) %></p>
+                <p class="text-2xl font-bold">₹<%= totalDiscount.toFixed(2) %></p>
             </div>
         </div>
 
@@ -74,20 +74,27 @@
                 <thead>
                     <tr class="bg-gray-200 text-left">
                         <th class="p-2 border">Order ID</th>
+                        <th class="p-2 border">User ID</th>
                         <th class="p-2 border">Date</th>
-                        <th class="p-2 border">Total Amount</th>
+                        <th class="p-2 border">Order Amount</th>
+                        <th class="p-2 border">Coupon Deduction</th>
+                        <th class="p-2 border">Payment Status</th>
                         <th class="p-2 border">Discount</th>
-                        <th class="p-2 border">Final Amount</th>
+                        <th class="p-2 border">Payment Method</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% orders.forEach(order => { %>
                         <tr class="hover:bg-gray-100">
-                            <td class="p-2 border"><%= order._id %></td>
-                            <td class="p-2 border"><%= new Date(order.orderDate).toLocaleDateString() %></td>
-                            <td class="p-2 border">$<%= order.totalAmount.toFixed(2) %></td>
-                            <td class="p-2 border">$<%= (order.discountAmount + order.couponDiscount).toFixed(2) %></td>
-                            <td class="p-2 border">$<%= order.finalAmount.toFixed(2) %></td>
+                            <td class="p-2 border"><%= order.orderId %></td>
+                            <td class="p-2 border"><%= order.userId %></td>
+                            <td class="p-2 border"><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                            <td class="p-2 border">₹<%= order.totalAmount.toFixed(2) %></td>
+                       
+                            <td class="p-2 border">₹<%= order.couponDiscount.toFixed(2) %></td>
+                            <td class="p-2 border"><%= order.isPaid===true?"Completed":'pending' %></td>
+                            <td class="p-2 border">₹<%= order.totalDiscount.toFixed(2) %></td>
+                            <td class="p-2 border"><%= order.paymentMethod %></td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -97,8 +104,11 @@
         <!-- Download Options -->
         <div class="mt-6 flex space-x-4">
             <a href="/admin/sales-report/pdf?startDate=<%= startDate %>&endDate=<%= endDate %>" class="bg-red-500 text-white px-4 py-2 rounded-md">
+             
                 Download PDF
             </a>
+            <p>End Date: <%= endDate %></p>
+      
             <a href="/admin/sales-report/excel?startDate=<%= startDate %>&endDate=<%= endDate %>" class="bg-green-500 text-white px-4 py-2 rounded-md">
                 Download Excel
             </a>
@@ -107,31 +117,7 @@
   </div>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // JavaScript function to toggle offer status
-    async function toggleOfferStatus(offerId) {
-      try {
-        const response = await axios.patch(`/offers/toggleStatus/${offerId}`);
-        
-        if (response.data.success) {
-          // Update the status and button label dynamically
-          const statusElem = document.getElementById(`status-${offerId}`);
-          const buttonElem = document.getElementById(`btn-${offerId}`);
-          
-          if (response.data.isActive) {
-            statusElem.innerText = 'Active';
-            buttonElem.innerText = 'Block';
-          } else {
-            statusElem.innerText = 'Inactive';
-            buttonElem.innerText = 'Unblock';
-          }
-        } else {
-          alert('Failed to toggle offer status.');
-        }
-      } catch (error) {
-        console.error("Error toggling offer status:", error);
-        alert('An error occurred. Please try again.');
-      }
-    }
+  
   </script>
 </body>
 </html>

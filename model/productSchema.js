@@ -100,6 +100,11 @@ const productSchema=mongoose.Schema({
     type: String,
     required:false
   },
+  productSold:{
+     type:Number,
+     default:0,
+     min:0
+  },
   discountType: { 
     type: String, 
     enum: ['percentage', 'fixed'],

@@ -41,19 +41,19 @@
       }
     </style>
   </head>
-  <body class="bg-gray-100">
+  <body class="bg-gray-900">
     <div class="flex h-50">
       <!-- Admin Sidebar -->
       <%- include('../partials/adminSidebar') %>
 
       <!-- Main Content -->
-      <div class="flex-1 p-6 bg-gray-100">
+      <div class="flex-1 p-6 bg-gray-900">
         <!-- Admin Login Icon -->
         <%- include('../partials/adminLoginIcon') %>
 
         <!-- Page Header with Add Coupon Button -->
         <div class="flex justify-between items-center mb-6">
-          <h1 class="text-3xl font-bold text-gray-800">Coupon Management</h1>
+          <h1 class="text-3xl font-bold text-white font-awesome">Coupon Management</h1>
           <button
             id="addCouponBtn"
             class="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg shadow hover:bg-green-600"
@@ -66,32 +66,32 @@
         <div class="overflow-x-auto">
           <table class="min-w-full bg-white border border-gray-200">
             <thead>
-              <tr class="bg-gray-100 border-b border-gray-200">
-                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+              <tr class="bg-gray-900 border-b border-gray-200">
+                <th class="py-3 px-4 text-left text-white font-medium">
                   Coupon Code
                 </th>
-                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                <th class="py-3 px-4 text-left text-white font-medium">
                   Type
                 </th>
-                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                <th class="py-3 px-4 text-left text-white font-medium">
                   Value
                 </th>
-                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                <th class="py-3 px-4 text-left text-white font-medium">
                   Min Order
                 </th>
-                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                <th class="py-3 px-4 text-left text-white font-medium">
                   Start Date
                 </th>
-                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                <th class="py-3 px-4 text-left text-white font-medium">
                   End Date
                 </th>
-                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                <th class="py-3 px-4 text-left text-white font-medium">
                   Usage Limit
                 </th>
-                <th class="py-3 px-4 text-left text-gray-700 font-medium">
+                <th class="py-3 px-4 text-left text-white font-medium">
                   Status
                 </th>
-                <th class="py-3 px-4 text-left  text-center font-medium">
+                <th class="py-3 px-4 text-left text-white text-center font-medium">
                   Action
                 </th>
               </tr>
@@ -133,7 +133,7 @@
                 </td>
                 <td class="py-3 px-4 space-x-2">
                   <button
-                    class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600" onclick="editCoupon('<%=coupon._id %> ')"
+                    class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"  onclick="window.location.href='/admin/editCoupon/<%= coupon._id %>'"
                   >
                     Edit
                   </button>
@@ -303,6 +303,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+      <% if (message && message.length > 0) { %>
+          Swal.fire({
+              title: 'Success!',
+              text: '<%= message %>',
+              icon: 'success',
+              confirmButtonText: 'OK'
+          });
+      <% } %>
+  </script>
     <script>
       document.getElementById("addCouponBtn").addEventListener("click", () => {
         document.getElementById("couponFormContainer").classList.add("active");

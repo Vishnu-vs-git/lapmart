@@ -72,8 +72,17 @@ exports.applyCoupon= async (req, res) => {
     // Ensure discount does not exceed subtotal
     discountAmount = Math.min(discountAmount, subTotal);
     const discountedTotal = subTotal - discountAmount;
-     cart.subTotal=discountedTotal;
+    //  cart.grandTotal=discountedTotal;
+    let taxRate=.18;
+    let newTax=Math.round(discountedTotal*.18);
+    console.log('discountedTotal',discountedTotal)
+
+    cart.tax=newTax
+    console.log('cart innnn apply tax',newTax)
+    console.log('cart innnn apply coupon',cart)
+    
      cart.couponDiscount=discountAmount;
+     cart.grandTotal=discountedTotal+newTax
      await cart.save();
 
 
@@ -87,6 +96,6 @@ exports.applyCoupon= async (req, res) => {
     });
   } catch (error) {
     console.error('Coupon application error:', error);
-    res.status(500).json({ success: false, message: 'Failed to apply coupon. Please try again.' });
+    res.status(500).json({ success: false, message: 'Failed to apply coupon GHJHJ. Please try again.' });
   }
 };

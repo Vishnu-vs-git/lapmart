@@ -64,9 +64,19 @@
                             </div>
                             <p class="text-gray-600 mb-2">Order Date: <strong><%= new Date(order.createdAt).toDateString() %></strong></p>
                             <p class="text-gray-600 mb-4">Total Amount: <strong>₹<%= order.totalAmount.toFixed(2) %></strong></p>
-                            <p class="text-gray-600 mb-4">Coupon Discount: <strong>₹<%= (order.couponDiscount?order.couponDiscount:0).toFixed(2) %></strong></p>
+                            <p class="text-gray-600 mb-4">Coupon Discount: <strong>₹<%= (order.couponDiscount ? order.couponDiscount : 0).toFixed(2) %></strong></p>
                             <p class="text-gray-600 mb-4">Discount: <strong>₹<%= (Number(order.totalDiscount) || 0).toFixed(2) %></strong></p>
-
+                    
+                            <!-- Razorpay Failed Payment Message and Pay Again Button -->
+                            <% if (order.paymentMethod === 'Razorpay' && order.isPaid === false) { %>
+                                <div class="bg-red-100 text-red-700 p-2 rounded-lg mt-2">
+                                    <p>Oops, payment failed!</p>
+                                    <button onclick="retryPayment('<%= order.orderId %>')" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                        Pay Again
+                                    </button>
+                                </div>
+                            <% } %>
+                            
 
                             <% order.items.forEach(item => { %>
                                 <div class="border-t border-gray-300 py-4 flex flex-col md:flex-row items-start md:items-center">
@@ -81,7 +91,10 @@
                                                 <%= item.itemOrderStatus %>
                                             </span>
                                         </p>
+
+                                   
                                     </div>
+
                                     <div class="mt-4 md:mt-0 md:ml-4 flex space-x-2">
                                         <!-- View Details button -->
                                         <a href="/user/orderDetails/<%= order.orderId %>" class="inline-block mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
@@ -89,7 +102,7 @@
                                         </a>
                                         <button class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition" 
                                             onclick="showActionModal('<%= item.productId._id %>', '<%= order.orderId %>', '<%= item.itemOrderStatus %>')" 
-                                            <%= item.itemOrderStatus === 'Cancelled' ? 'hidden' : '' %>>
+                                            <%= item.itemOrderStatus === 'Cancelled'||item.itemOrderStatus === 'return requested'||item.itemOrderStatus === 'returned'||item.itemOrderStatus === 'return rejected' ? 'hidden' : '' %>>
                                             <%= item.itemOrderStatus === 'Delivered' ? 'Return Item' : 'Cancel Item' %>
                                         </button>
                                     </div>
@@ -124,6 +137,8 @@
             </div>
         </div>
     </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
         let currentItemId;
@@ -164,6 +179,7 @@
                     reason: reason
                 })
             }).then(response => response.json()).then(data => {
+                console.log('data',data)
                 if (data.success) {
                     Swal.fire({
                         title: `${currentAction.charAt(0).toUpperCase() + currentAction.slice(1)} Successful`,
@@ -190,6 +206,59 @@
                 });
             }).finally(closeModal);
         };
+
+        function retryPayment(orderId) {
+    fetch('/user/retryPayment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const options = {
+                    key: "rzp_test_KDYrLJHnu3O9Ip", // Replace with your Razorpay Key
+                    amount: data.razorpayOrder.amount,
+                    currency: "INR",
+                    order_id: data.razorpayOrder.id,
+                    handler: function (response) {
+                        verifyPayment(response, orderId);
+                    },
+                };
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                Swal.fire("Error", data.message, "error");
+            }
+        })
+        .catch(error => console.error("Error retrying payment:", error));
+}
+
+function verifyPayment(response, orderId) {
+    fetch('/verifyPayment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+            signature: response.razorpay_signature,
+            orderIds: orderId,
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire("Success", "Payment verified successfully!", "success").then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire("Error", "Payment verification failed.", "error");
+            }
+        })
+        .catch(error => console.error("Error verifying payment:", error));
+}
+
+
     </script>
 
 </body>

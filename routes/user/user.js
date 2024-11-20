@@ -12,10 +12,12 @@ const walletController=require('../../controllers/user/walletControler')
 const couponController=require('../../controllers/user/coupon controller');
 const wishlistController=require('../../controllers/user/wishlistController');
 const checkStockAvailability=require('../../middleware/checkStock')
-
+  const { blockUser } = require('../../middleware/BlockUser'); 
 const checkUser= require('../../middleware/checkuser')
 
 router.use(checkUser.checkuser)
+
+  router.use(blockUser)
 
 
 router.get('/',userController.userHome)
@@ -96,6 +98,7 @@ router.post('/placeOrder',isUser,orderController.confirmOrder)
 
  router.post('/createRpayOrder',isUser,checkoutController.createRazorPayOrder)
  router.post('/verifyPayment',isUser,checkoutController.verifyPayment)
+ router.post('/retryPayment',isUser,orderController.retryPayment)
 
  router.get('/wallet',isUser,walletController.getwallet)
  router.post('/applyCoupon',isUser,couponController.applyCoupon);

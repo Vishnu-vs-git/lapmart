@@ -31,9 +31,24 @@ exports.addOffer = async (req, res) => {
     console.log('category in offrr',  catename)
     const products = await Product.find({ category:  catename }); 
 
-    products.forEach((product) => {
-      product.discountValue = parseInt(product.discountValue || 0) + parseInt(discount);
-      product.save(); 
+    products.forEach(async (product) => {
+       if(product. discountType==='percentage'){
+        console.log('current discount value',product.discountValue)
+      product.discountValue = parseInt(product.discountValue || 0) + parseInt((100-product.discountValue)*discount/100);
+      product.discountType='percentage'
+      product.finalPrice=parseInt(product.price) - parseInt(product.discountValue)  
+      console.log('product final price in offer',product.discountValue );
+
+      
+      await product.save(); 
+       }else{
+        if(product. discountType==='fixed'){
+          product.discountValue=parseInt(product.discountValue || 0) + parseInt((product.price-product.discountValue)*discount/100);
+          product.finalPrice=parseInt(product.price) - parseInt(product.discountValue)  ;   
+         }
+       await product.save(); 
+      }
+
     });
     
     console.log('productsss',products)

@@ -98,8 +98,9 @@ exports.postCheckoutAddress = async (req, res) => {
 
 exports.createRazorPayOrder = async (req, res) => {
   const userId = req.session.user._id;
+  const{addressData,paymentMethod}=req.body;
   const cartitems = await cart.findOne({ userId: userId });
-  const amount = cartitems.subTotal;
+  const amount = cartitems.grandTotal;
   console.log("total in cartitems", amount);
   console.log("cartItems in razor pay", cartitems);
 
@@ -115,8 +116,37 @@ exports.createRazorPayOrder = async (req, res) => {
     if (!order) {
       throw new Error("Failed to create Razorpay order");
     }
+     
+    const items = cartitems.items.map((item) => {
+      return {
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+        itemTotal: item.total,
+        itemOrderStatus: "Pending", // Add the field with the default value
+        paymentStatus: "pending",
+        originalPrice:item.originalPrice
+      };
+    });
+    const orderIds = generateOrderId();
+    // Create a new order using the modified items array
+    const orderitem = new Order({
+      userId: userId,
+      orderId: orderIds,
+      items: items,
+      subTotal:cartitems.subTotal,
+      totalAmount: cartitems.grandTotal,
+      shippingAddress: addressData,
+      paymentMethod: paymentMethod,
+      orderStatus: "Pending", 
+      tax:cartitems.tax,
+      couponDiscount:cartitems.couponDiscount,
+      totalDiscount:cartitems.totalDiscount
+    });
+    
+    await orderitem.save();
 
-    return res.json(order);
+    return res.json({order,orderIds});
   } catch (error) {
     console.error("Error creating Razorpay order:", error);
     return res
@@ -128,7 +158,7 @@ exports.createRazorPayOrder = async (req, res) => {
 exports.verifyPayment = async (req, res) => {
   console.log("verify payment working");
 
-  const { paymentId, orderId, signature, address, paymentMethod } = req.body;
+  const { paymentId, orderId,orderIds, signature, address, paymentMethod } = req.body;
 
   try {
     // Verifying the signature
@@ -141,42 +171,37 @@ exports.verifyPayment = async (req, res) => {
     }
 
     const userId = req.session.user._id;
-    const cartitems = await cart.findOne({ userId: userId });
+    const orderItems = await Order.findOne({ orderId: orderIds, userId: userId });
+   orderItems.isPaid=true;
+if (orderItems) {
+  orderItems.items = orderItems.items.map((item) => {
+    return {
+      ...item, 
+      paymentStatus: "paid", // Update paymentStatus to "paid"
+    };
+  });
 
-    const items = cartitems.items.map((item) => {
-      return {
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        itemTotal: item.total,
-        itemOrderStatus: "Pending", // Add the field with the default value
-        paymentStatus: "paid",
-      };
-    });
-    const orderIds = generateOrderId();
+  await orderItems.save(); // Save the updated document
+  console.log('Order items updated successfully');
+} else {
+  console.log('Order not found');
+}
+
+    
+  
     // Create a new order using the modified items array
-    const order = new Order({
-      userId: userId,
-      orderId: orderIds,
-      items: items,
-      totalAmount: cartitems.subTotal,
-      shippingAddress: address,
-      paymentMethod: paymentMethod,
-      orderStatus: "Pending", 
-      couponDiscount:cartitems.couponDiscount,
-      totalDiscount:cartitems.totalDiscount
-    });
+    console.log('orderItems in razor',orderItems)
 
-    for (const item of order.items) {
+    for (const item of orderItems.items) {
       await product.findByIdAndUpdate(item.productId._id, {
-        $inc: { quantity: -item.quantity },
+        $inc: { quantity: -item.quantity,productSold:+item.quantity },
       });
     }
 
-    await order.save();
+    await orderItems.save();
     await cart.deleteOne({ userId: userId });
 
-    res.status(201).json({ success: true, order });
+    res.status(201).json({ success: true, orderItems });
   } catch (error) {
     console.error("Error verifying payment:", error);
     return res
@@ -193,3 +218,14 @@ function generateOrderId() {
   return `${prefix}-${timestamp}-${randomComponent}`;
 }
 //----------------------------------------------------------------->
+
+
+
+
+
+
+
+
+
+
+

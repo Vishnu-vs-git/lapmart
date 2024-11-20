@@ -129,17 +129,21 @@
   </div>
   <div class="flex justify-between text-gray-600">
     <span>Coupon Applied</span>
-    <span id="discountAmount" class="text-red-600"><%= cartItems.couponCode ? cartItems.couponValue : 'None' %></span> <!-- Display coupon code if applied -->
+    <span id="discountAmount" class="text-red-600"><%= cartItems.couponDiscount ? cartItems.couponDiscount : 'None' %></span> <!-- Display coupon code if applied -->
   </div>
   <div class="flex justify-between text-gray-600">
     <span>Delivery</span>
     <span class="text-green-600">Free</span>
   </div>
+  <div class="flex justify-between text-gray-600">
+    <span>Tax(18%):</span>
+    <span class="text-green-600">₹<%=cartItems.tax %></span>
+  </div>
   <div class="h-px bg-gray-200 my-4"></div>
   <div class="flex justify-between text-lg font-bold text-gray-900">
     <%console.log(cartItems)%>
     <span>Total</span>
-    <span id="totalAmount">₹<%= cartItems.subTotal %></span> <!-- Updated total after applying coupon -->
+    <span id="totalAmount">₹<%= cartItems.grandTotal %></span> <!-- Updated total after applying coupon -->
   </div>
 </div>
 <!-- Coupon Section -->
@@ -213,53 +217,58 @@
   
   <script>
     
-      //---------->  when press the apply coupon it happens
-
-      document.getElementById('applyCouponBtn').addEventListener('click', function() {
+    document.getElementById('applyCouponBtn').addEventListener('click', function () {
   const couponCodeInput = document.getElementById('couponCode').value;
-  
+
   // Send the coupon code to the backend to apply it
-  axios.post('/user/applyCoupon', { couponCode: couponCodeInput })
-    .then(response => {
+  axios
+    .post('/user/applyCoupon', { couponCode: couponCodeInput })
+    .then((response) => {
       if (response.data.success) {
+        console.log('response in coupon', response);
         Swal.fire({
           icon: 'success',
           text: 'Coupon applied successfully!',
           showConfirmButton: true,
-          timer: 3000
-        });
+          timer: 3000,
+        }).then(()=>{
+          window.location.reload();
+        })
 
         // Update the order summary with the coupon discount information
         const discountedTotal = response.data.discountedTotal;
         const discountAmount = response.data.discountAmount;
         const appliedCouponCode = response.data.couponCode;
 
-        // Display coupon code and discount in the order summary
-        document.getElementById('couponCode').value = `Coupon Applied: ${appliedCouponCode}`;
-        document.getElementById('discountAmount').innerText = `₹${discountAmount}`;
-        document.getElementById('totalAmount').innerText = `Total: ₹${discountedTotal}`;
+        // Update the UI only if successful
+        document.getElementById(
+          'couponCode'
+        ).value = `Coupon Applied: ${appliedCouponCode}`;
+        document.getElementById(
+          'discountAmount'
+        ).innerText = `₹${discountAmount}`;
+        document.getElementById(
+          'totalAmount'
+        ).innerText = `Total: ₹${discountedTotal}`;
       } else {
         Swal.fire({
           icon: 'error',
           text: response.data.message,
           showConfirmButton: true,
-          timer: 3000
+          timer: 3000,
         });
       }
     })
-    .catch(error => {
-      document.getElementById('couponMessage').classList.remove('hidden');
+    .catch((error) => {
+      console.error('Coupon application failed:', error);
       Swal.fire({
         icon: 'error',
-        text: 'Failed to apply coupon.',
+        text: 'WHY GOD',
         showConfirmButton: true,
-        timer: 3000
+        timer: 3000,
       });
     });
 });
-
-
-        
 
     const addAddressBtn = document.getElementById('addAddressBtn');
     const addressForm = document.getElementById('addressForm');
@@ -370,7 +379,7 @@
         
         Swal.fire({
         icon:'error',
-        text:'There was an issue placing your order. Please try again.',
+        text:data.message,
         showConfirmButton:false,
         showCancelButton: false,
         timer:3000
@@ -431,12 +440,16 @@
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            amount: 5000, // Replace with the actual amount in smallest currency unit (e.g., paise)
+            amount: 5000,
+            addressData:addressData,
+            paymentMethod: paymentMethod
+
+             // Replace with the actual amount in smallest currency unit (e.g., paise)
           })
         })
         .then(response => response.json())
-        .then(order => {
-          console.log(`data = ${order}`)
+        .then(data => {
+         const{order,orderIds}=data
           if (order) {
             const options = {
               key: 'rzp_test_KDYrLJHnu3O9Ip', // Replace with your Razorpay key ID
@@ -466,7 +479,8 @@
                     orderId:response.razorpay_order_id,
 
                     paymentId: response.razorpay_payment_id,
-                    signature:response.razorpay_signature
+                    signature:response.razorpay_signature,
+                    orderIds:orderIds
 
                   })
                 })

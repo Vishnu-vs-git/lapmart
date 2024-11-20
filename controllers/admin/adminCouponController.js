@@ -2,9 +2,11 @@ const Coupon = require("../../model/couponSchema");
 
 exports.getCoupons = async (req, res) => {
   try {
+    const message= req.session.message;
+    delete req.session.message
    const coupons=await Coupon.find();
 
-    res.render("admin/couponManagement", { coupons });
+    res.render("admin/couponManagement", { coupons,message });
   } catch (error) {}
 };
 ///....................> Coupon add form rendering------>
@@ -125,12 +127,40 @@ exports.removeCoupon=async(req,res)=>{
 
 exports.getEditCoupon=async(req,res)=>{
   try{
-    res.render("admin/editCoupon")
+      const couponId=req.params.id;
+      const coupon=await Coupon.findById(couponId);
+    res.render("admin/editCoupon",{coupon})
   }catch(error){
     console.error('error in getting page',error);
     res.statsu(500).json({message:'error in getting edit coupon page'});
   }
 }
 
+exports.postEditCoupon=async(req,res)=>{
+  try{
+    const couponId=req.params.id;
+    const{code,couponType,couponValue,minPurchaseAmount,startDate,expiryDate,totalUsageLimit}=req.body;
+    console.log('reqbody is',req.body)
+     const updatedcoupon= await Coupon.findByIdAndUpdate(couponId,{
+      code,
+      couponType,
+      couponValue,
+      minPurchaseAmount,
+      startDate,
+      expiryDate,
+      totalUsageLimit
+     },{new:true});
+     console.log('updated Coupon',updatedcoupon)
+      if(!updatedcoupon){
+        return res.status(404).json({success:true,message:'Error in updating coupon'})
+
+      }
+      req.session.message='coupon updated sucessfully'
+      res.redirect("/admin/coupons")
+  }catch(error){
+    console.error('Error in editing coupon',error);
+    res.status(500).json({message:'Error happened in updating coupon'})
+  }
+}
 
 

@@ -20,58 +20,198 @@
         </header>
   
       <h1 class="text-3xl font-bold text-gray-800 mb-6">Edit Coupon</h1>
-      <form action="/admin/coupons/update/<%= coupon._id %>" method="POST" class="max-w-lg mx-auto bg-white p-8 rounded shadow">
+      <form action="/admin/updateCoupon/<%= coupon._id %>" method="Post" class="max-w-lg mx-auto bg-white p-8 rounded shadow">
         <!-- Coupon Code -->
-        <div class="mb-4">
-          <label for="couponCode" class="block text-gray-700 font-bold mb-1">Coupon Code</label>
-          <input type="text" id="couponCode" name="code" class="w-full px-4 py-2 border rounded" value="<%= coupon.code %>" required />
-        </div>
+       <!-- Coupon Code -->
+<div class="mb-4">
+  <label for="couponCode" class="block text-gray-700 font-bold mb-1">Coupon Code</label>
+  <input type="text" id="couponCode" name="code" class="w-full px-4 py-2 border rounded" value="<%= coupon.code %>" required />
+  <span id="couponCodeError" class="text-red-500 text-sm mt-2"></span> <!-- Error message -->
+</div>
 
-        <!-- Coupon Type -->
-        <div class="mb-4">
-          <label for="couponType" class="block text-gray-700 font-bold mb-1">Coupon Type</label>
-          <select id="couponType" name="couponType" class="w-full px-4 py-2 border rounded" required>
-            <option value="percentage" <%= coupon.couponType === 'percentage' ? 'selected' : '' %>>Percentage</option>
-            <option value="number" <%= coupon.couponType === 'number' ? 'selected' : '' %>>Fixed Amount</option>
-          </select>
-        </div>
+<!-- Coupon Type -->
+<div class="mb-4">
+  <label for="couponType" class="block text-gray-700 font-bold mb-1">Coupon Type</label>
+  <select id="couponType" name="couponType" class="w-full px-4 py-2 border rounded" required>
+    <option value="percentage" <%= coupon.couponType === 'percentage' ? 'selected' : '' %>>Percentage</option>
+    <option value="number" <%= coupon.couponType === 'number' ? 'selected' : '' %>>Fixed Amount</option>
+  </select>
+  <span id="couponTypeError" class="text-red-500 text-sm mt-2"></span> <!-- Error message -->
+</div>
 
-        <!-- Coupon Value -->
-        <div class="mb-4">
-          <label for="couponValue" class="block text-gray-700 font-bold mb-1">Coupon Value</label>
-          <input type="number" id="couponValue" name="couponValue" class="w-full px-4 py-2 border rounded" value="<%= coupon.couponValue %>" required />
-        </div>
+<!-- Coupon Value -->
+<div class="mb-4">
+  <label for="couponValue" class="block text-gray-700 font-bold mb-1">Coupon Value</label>
+  <input type="number" id="couponValue" name="couponValue" class="w-full px-4 py-2 border rounded" value="<%= coupon.couponValue %>" required />
+  <span id="couponValueError" class="text-red-500 text-sm mt-2"></span> <!-- Error message -->
+</div>
 
-        <!-- Min Purchase Amount -->
-        <div class="mb-4">
-          <label for="minPurchaseAmount" class="block text-gray-700 font-bold mb-1">Min Purchase Amount</label>
-          <input type="number" id="minPurchaseAmount" name="minPurchaseAmount" class="w-full px-4 py-2 border rounded" value="<%= coupon.minPurchaseAmount %>" required />
-        </div>
+<!-- Min Purchase Amount -->
+<div class="mb-4">
+  <label for="minPurchaseAmount" class="block text-gray-700 font-bold mb-1">Min Purchase Amount</label>
+  <input type="number" id="minPurchaseAmount" name="minPurchaseAmount" class="w-full px-4 py-2 border rounded" value="<%= coupon.minPurchaseAmount %>" required />
+  <span id="minPurchaseAmountError" class="text-red-500 text-sm mt-2"></span> <!-- Error message -->
+</div>
 
-        <!-- Start Date -->
-        <div class="mb-4">
-          <label for="startDate" class="block text-gray-700 font-bold mb-1">Start Date</label>
-          <input type="date" id="startDate" name="startDate" class="w-full px-4 py-2 border rounded" value="<%= coupon.startDate ? coupon.startDate.toISOString().split('T')[0] : '' %>" />
-        </div>
+<!-- Start Date -->
+<div class="mb-4">
+  <label for="startDate" class="block text-gray-700 font-bold mb-1">Start Date</label>
+  <input type="date" id="startDate" name="startDate" class="w-full px-4 py-2 border rounded" value="<%= coupon.startDate ? coupon.startDate.toISOString().split('T')[0] : '' %>" />
+  <span id="startDateError" class="text-red-500 text-sm mt-2"></span> <!-- Error message -->
+</div>
 
-        <!-- Expiry Date -->
-        <div class="mb-4">
-          <label for="expiryDate" class="block text-gray-700 font-bold mb-1">Expiry Date</label>
-          <input type="date" id="expiryDate" name="expiryDate" class="w-full px-4 py-2 border rounded" value="<%= coupon.expiryDate ? coupon.expiryDate.toISOString().split('T')[0] : '' %>" />
-        </div>
+<!-- Expiry Date -->
+<div class="mb-4">
+  <label for="expiryDate" class="block text-gray-700 font-bold mb-1">Expiry Date</label>
+  <input type="date" id="expiryDate" name="expiryDate" class="w-full px-4 py-2 border rounded" value="<%= coupon.expiryDate ? coupon.expiryDate.toISOString().split('T')[0] : '' %>" />
+  <span id="expiryDateError" class="text-red-500 text-sm mt-2"></span> <!-- Error message -->
+</div>
 
-        <!-- Total Usage Limit -->
-        <div class="mb-4">
-          <label for="totalUsageLimit" class="block text-gray-700 font-bold mb-1">Total Usage Limit</label>
-          <input type="number" id="totalUsageLimit" name="totalUsageLimit" class="w-full px-4 py-2 border rounded" value="<%= coupon.totalUsageLimit %>" required />
-        </div>
+<!-- Total Usage Limit -->
+<div class="mb-4">
+  <label for="totalUsageLimit" class="block text-gray-700 font-bold mb-1">Total Usage Limit</label>
+  <input type="number" id="totalUsageLimit" name="totalUsageLimit" class="w-full px-4 py-2 border rounded" value="<%= coupon.totalUsageLimit %>" required />
+  <span id="totalUsageLimitError" class="text-red-500 text-sm mt-2"></span> <!-- Error message -->
+</div>
 
-        <!-- Save Button -->
-        <div class="text-center">
-          <button type="submit" class="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600">Update Coupon</button>
-        </div>
+<!-- Save Button -->
+<div class="text-center">
+  <button type="submit" id="submitButton" class="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600">Update Coupon</button>
+</div>
+
       </form>
     </div>
   </div>
+  <script>
+    // Get references to form elements
+    const couponCode = document.getElementById('couponCode');
+    const couponType = document.getElementById('couponType');
+    const couponValue = document.getElementById('couponValue');
+    const minPurchaseAmount = document.getElementById('minPurchaseAmount');
+    const startDate = document.getElementById('startDate');
+    const expiryDate = document.getElementById('expiryDate');
+    const totalUsageLimit = document.getElementById('totalUsageLimit');
+  
+    // Get references to error message elements
+    const couponCodeError = document.getElementById('couponCodeError');
+    const couponTypeError = document.getElementById('couponTypeError');
+    const couponValueError = document.getElementById('couponValueError');
+    const minPurchaseAmountError = document.getElementById('minPurchaseAmountError');
+    const startDateError = document.getElementById('startDateError');
+    const expiryDateError = document.getElementById('expiryDateError');
+    const totalUsageLimitError = document.getElementById('totalUsageLimitError');
+    
+  const currentDate = new Date().toISOString().split("T")[0];
+  
+    // Validate Coupon Code
+    function validateCouponCode() {
+      const code = couponCode.value.trim();
+      const codeRegex = /^[A-Z0-9]{1,15}$/;
+      if (code === '') {
+        couponCodeError.textContent = 'Coupon code is required.';
+        return false;
+      }
+      if (code.length > 15) {
+        couponCodeError.textContent = 'Coupon code should not exceed 15 characters.';
+        return false;
+      }
+      if (!codeRegex.test(code)) {
+        couponCodeError.textContent = 'Coupon code must start with an uppercase letter and contain only uppercase letters and numbers.';
+        return false;
+      }
+      couponCodeError.textContent = ''; // Clear error
+      return true;
+    }
+  
+    // Validate Usage Count
+    function validateUsageCount() {
+      const usageCount = totalUsageLimit.value.trim();
+      if (usageCount <= 0 || usageCount >= 6) {
+        totalUsageLimitError.textContent = 'Usage count should be between 1 and 5.';
+        return false;
+      }
+      if (!/^\d+$/.test(usageCount)) {
+        totalUsageLimitError.textContent = 'Usage count should contain only numbers.';
+        return false;
+      }  if (!isInteger(usageCount)) {
+      totalUsageLimitError.textContent = 'Usage count should contain only whole numbers.';
+      return false;
+    }
+      totalUsageLimitError.textContent = ''; // Clear error
+      return true;
+    }
+  
+    // Validate Coupon Value (Percentage type)
+    function validateCouponValue() {
+      const value = couponValue.value.trim();
+      if (couponType.value === 'percentage') {
+        if (value <= 1 || value >= 100) {
+          couponValueError.textContent = 'Coupon value should be between 1 and 100 for percentage type.';
+          return false;
+        }
+      } else { // Fixed amount
+        if (value > 10000) {
+          couponValueError.textContent = 'Coupon value must be less  than 10,000 for fixed amount type.';
+          return false;
+        }
+      }
+      if (!/^\d+$/.test(value)) {
+        couponValueError.textContent = 'Coupon value should contain only numbers.';
+        return false;
+      }  if (!isInteger(value)) {
+      totalUsageLimitError.textContent = 'Usage count should contain only whole numbers.';
+      return false;
+    }
+      couponValueError.textContent = ''; // Clear error
+      return true;
+    }
+  
+    // Validate Min Purchase Amount
+    function validateMinPurchaseAmount() {
+      const minAmount = minPurchaseAmount.value.trim();
+      if (minAmount < 15000) {
+        minPurchaseAmountError.textContent = 'Min purchase amount should not be less than 15,000.';
+        return false;
+      }  if (!isInteger(minAmount)) {
+      totalUsageLimitError.textContent = 'Usage count should contain only whole numbers.';
+      return false;
+    }
+      if (!/^\d+$/.test(minAmount)) {
+        minPurchaseAmountError.textContent = 'Min purchase amount should contain only numbers.';
+        return false;
+      }
+      minPurchaseAmountError.textContent = ''; // Clear error
+      return true;
+    }
+  
+    // Validate Expiry Date (should be after start date)
+    function validateExpiryDate() {
+      if (expiryDate.value < startDate.value) {
+        expiryDateError.textContent = 'Expiry date cannot be earlier than the start date.';
+        return false;
+      }if( startDate.value<currentDate){
+        expiryDateError.textContent = 'start date cannot be earlier than the current date.';
+        return false;
+      }
+      expiryDateError.textContent = ''; // Clear error
+      return true;
+    }
+  
+    // Add event listeners to fields
+    couponCode.addEventListener('input', validateCouponCode);
+    totalUsageLimit.addEventListener('input', validateUsageCount);
+    couponValue.addEventListener('input', validateCouponValue);
+    minPurchaseAmount.addEventListener('input', validateMinPurchaseAmount);
+    startDate.addEventListener('input', validateExpiryDate);
+    expiryDate.addEventListener('input', validateExpiryDate);
+  
+    // Form submission (prevent if validation fails)
+    document.querySelector('form').addEventListener('submit', function (e) {
+      if (!validateCouponCode() || !validateUsageCount() || !validateCouponValue() || !validateMinPurchaseAmount() || !validateExpiryDate()) {
+        e.preventDefault(); // Prevent form submission if any validation fails
+      }
+    });
+  </script>
+  
 </body>
 </html>

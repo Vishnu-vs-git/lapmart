@@ -5,7 +5,7 @@ exports.getCartPage = async (req, res) => {
   try {
     const userId = req.session.user._id;
     if (!userId) {
-      return res.redirect('/login'); 
+      return res.redirect('/login');
     }
 
     const message = req.session.message;
@@ -16,29 +16,37 @@ exports.getCartPage = async (req, res) => {
       return res.render('user/userCart', {
         cartItems: [],
         subtotal: 0,
-        discount: 0,
+        totalDiscount: 0,
+        tax: 0,
+        grandTotal: 0,
         deliveryCharge: 0,
         message: null
       });
     }
 
     let subtotal = 0;
-    let discount = 0;
-    const deliveryCharge = 0;
+    let totalDiscount = 0;
+    const taxRate = 0.18; // Example tax rate of 18%
 
     cart.items.forEach(item => {
       const originalPrice = item.productId.price;
       const finalPrice = item.productId.discountValue > 0 ? item.productId.finalPrice : originalPrice;
 
-      subtotal += finalPrice * item.quantity;
-      discount += (originalPrice - finalPrice) * item.quantity;
+      subtotal += originalPrice * item.quantity;
+      totalDiscount += (originalPrice - finalPrice) * item.quantity;
     });
+
+    const tax =Math.round((subtotal-totalDiscount) * taxRate);
+ 
+    const grandTotal = ( subtotal-totalDiscount) + tax;
 
     res.render('user/userCart', {
       cartItems: cart.items,
       subtotal,
-      discount,
-      deliveryCharge,
+      totalDiscount,
+      tax,
+      grandTotal,
+      deliveryCharge: 0,
       message
     });
   } catch (error) {
@@ -60,7 +68,7 @@ exports.addToCart = async (req, res) => {
 
     const qty = parseInt(quantity, 10);
     const product = await Product.findById(productId);
-  
+
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
@@ -70,17 +78,10 @@ exports.addToCart = async (req, res) => {
     }
 
     const price = product.finalPrice > 0 ? product.finalPrice : product.price;
-  
-    const originalprice = product.price || 0;
-    const finalPrice = product.finalPrice || price; // If no discount, default finalPrice to price
-    const discounted = originalprice- finalPrice;
-    const totald=discounted*qty
-    console.log('discounted',discounted,totald)
-    
-     
+    const originalPrice = product.price;
     const itemTotal = qty * price;
 
-    let cart = await Cart.findOne({ userId }).populate('items.productId')
+    let cart = await Cart.findOne({ userId }).populate('items.productId');
 
     if (cart) {
       const itemIndex = cart.items.findIndex(item => item.productId.equals(productId));
@@ -93,12 +94,9 @@ exports.addToCart = async (req, res) => {
           quantity: qty,
           price,
           total: itemTotal,
+          originalPrice
         });
       }
-
-      cart.subTotal = cart.items.reduce((acc, item) => acc + item.total, 0);
-      cart.totalDiscount=totald
-   
     } else {
       cart = new Cart({
         userId,
@@ -107,27 +105,17 @@ exports.addToCart = async (req, res) => {
           quantity: qty,
           price,
           total: itemTotal,
-        }],
-        subTotal: itemTotal,
-        totalDiscount:totald
-     
+          originalPrice
+        }]
       });
-     
     }
-  
-    await cart.save()
-    console.log('cart is',cart)
-    console.log('cart subtotal is ',cart.subTotal);
-    
 
+    cart.subTotal = cart.items.reduce((acc, item) => acc + item.quantity * item.originalPrice, 0);
+    cart.totalDiscount = cart.items.reduce((acc, item) => acc + ((item.originalPrice - item.price) * item.quantity), 0);
+    cart.tax = Math.round((cart.subTotal- cart.totalDiscount) * 0.18);
+    cart.grandTotal = (cart.subTotal-cart.totalDiscount) + cart.tax;
 
-    
-    
-
-
-
-
-
+    await cart.save();
     return res.status(200).json({ message: 'Item added to cart successfully', cart });
   } catch (error) {
     console.error("Error adding to cart:", error);
@@ -140,7 +128,7 @@ exports.updateQuantity = async (req, res) => {
   const userId = req.session.user._id;
 
   try {
-    const cart = await Cart.findOne({ userId }).populate('items.productId'); 
+    const cart = await Cart.findOne({ userId }).populate('items.productId');
     if (!cart) {
       return res.status(404).json({ success: false, message: 'Cart not found' });
     }
@@ -150,34 +138,37 @@ exports.updateQuantity = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Cart item not found' });
     }
 
-    const product = cartItem.productId; 
+    const product = cartItem.productId;
     const qty = parseInt(quantity, 10);
 
-    if (qty <= 0 || qty > 5 || qty > product.quantity) {
-      return res.status(400).json({ success: false, message: 'Invalid quantity' });
+    if (qty <= 0 || qty > product.quantity||qty>5) {
+      return res.status(400).json({ success: false, message: 'Requested quantity not available' });
     }
 
-    const price = product.finalPrice > 0 ? product.finalPrice : product.price;
     cartItem.quantity = qty;
-    cartItem.total = cartItem.quantity * price;
+    cartItem.total = qty * cartItem.price;
 
-    cart.subTotal = cart.items.reduce((acc, item) => acc + item.total, 0);
-
-    cart.totalDiscount = cart.items.reduce((acc, item) => {
-      const product = item.productId;
-      const originalPrice = product.price;
-      const finalPrice = product.discountValue > 0 ? product.finalPrice : originalPrice;
-      return acc + (originalPrice - finalPrice) * item.quantity;
-    }, 0);
+    cart.subTotal = cart.items.reduce((acc, item) => acc + item.quantity * item.originalPrice, 0);
+    cart.totalDiscount = cart.items.reduce((acc, item) => acc + ((item.originalPrice - item.price) * item.quantity), 0);
+    cart.tax = Math.round((cart.subTotal-cart.totalDiscount) * 0.18);
+    cart.grandTotal = (cart.subTotal- cart.totalDiscount) + cart.tax;
 
     await cart.save();
 
-    res.status(200).json({ success: true, subtotal: cart.subTotal, discount: cart.totalDiscount, productTotal: cartItem.total });
+    res.status(200).json({
+      success: true,
+      subtotal: cart.subTotal,
+      discount: cart.totalDiscount,
+      tax: cart.tax,
+      grandTotal: cart.grandTotal,
+      productTotal: cartItem.total
+    });
   } catch (error) {
     console.error("Error updating quantity:", error);
     res.status(500).json({ success: false, message: 'Failed to update quantity' });
   }
 };
+
 
 exports.removeCartitems = async (req, res) => {
   try {
@@ -194,12 +185,10 @@ exports.removeCartitems = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Failed to remove item' });
     }
 
-    cart.subTotal = cart.items.reduce((acc, item) => acc + item.total, 0);
-    cart.totalDiscount = cart.items.reduce((acc, item) => {
-      const originalPrice = item.price;
-      const finalPrice = item.total / item.quantity;
-      return acc + (originalPrice - finalPrice) * item.quantity;
-    }, 0);
+    cart.subTotal = cart.items.reduce((acc, item) => acc + item.quantity * item.originalPrice, 0);
+    cart.totalDiscount = cart.items.reduce((acc, item) => acc + ((item.originalPrice - item.price) * item.quantity), 0);
+    cart.tax = Math.round((cart.subTotal- cart.totalDiscount)) * 0.18;
+    cart.grandTotal = (cart.subTotal- cart.totalDiscount) + cart.tax;
 
     await cart.save();
 

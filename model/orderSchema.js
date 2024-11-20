@@ -30,22 +30,37 @@ const orderSchema=mongoose.Schema({
       cancellationReason:{
         type:String,
       },
+      originalTotal:{
+         type:Number
+      },
+      originalPrice:{
+         type:Number
+      },
       returnReason:{
         type:String
       },
       itemOrderStatus: {
         type: String,
-        enum: ["Pending", "Shipped", "Delivered", "Cancelled","return requested","returned"],
+        enum: ["Pending", "Shipped", "Delivered", "Cancelled","return requested","returned",'return rejected'],
         default: "Pending",
       },
       paymentStatus:{
         type:String,
         enum:['paid','pending','refunded'],
         default:'pending'
-      }
+      },
+     
 
     },
   ],
+  isPaid:{
+    type:Boolean,
+    default:false
+  },
+  subTotal:{
+    type:Number
+
+  },
   totalAmount:{
     type:Number,
     required:true
@@ -72,6 +87,9 @@ const orderSchema=mongoose.Schema({
     enum:['Cash on Delivery','Razorpay','Wallet'],
     required:true
   },
+  tax: { 
+    type: Number, 
+     },
  
 },{timestamps:true});
 

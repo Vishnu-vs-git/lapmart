@@ -105,6 +105,7 @@ exports.postAddProduct = async (req, res) => {
     if (color && /\d/.test(color)) {
       return res.render('admin/addProducts', { message: { text: 'Color must be a string without numbers.', type: 'error' }, categories });
     }
+    
 
     if (!category) {
       return res.render('admin/addProducts', {

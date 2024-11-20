@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white font-sans leading-normal tracking-normal">
+
+    <!-- Main Wrapper: Using flex layout -->
+    <div class="flex">
+        <!-- Sidebar: Set a fixed width for the sidebar -->
+        <%- include('../partials/adminSidebar') %>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 ml-30 p-6">  <!-- This ensures that the content starts after 64px (the width of the sidebar) -->
+            
+            <!-- Admin Icon Partial -->
+            <%- include('../partials/adminLoginIcon') %>
+
+            <!-- Main Content -->
+            <main class="container ml-0 mx-auto mt-6 p-4">
+                <!-- Time Filter -->
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold hover:text-black hover:font-bold">Overview</h2>
+                    <select id="timeFilter" class="border rounded-md p-2 bg-white text-black">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly" selected>Yearly</option>
+                    </select>
+                </div>
+
+                <!-- Metrics -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md hover:bg-blue-100 transition duration-300 hover:text-black hover:font-bold">
+                        <h3 class="text-gray-300 text-lg font-semibold">Total Sales</h3>
+                        <p class="text-3xl font-bold text-blue-600" id="totalSales">$0</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md hover:bg-green-100 transition duration-300 hover:text-black hover:font-bold">
+                        <h3 class="text-gray-300 text-lg font-semibold">Total Orders</h3>
+                        <p class="text-3xl font-bold text-green-600" id="totalOrders">0</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg shadow-md hover:bg-yellow-100 transition duration-300 hover:text-black hover:font-bold">
+                        <h3 class="text-gray-300 text-lg font-semibold">Total Customers</h3>
+                        <p class="text-3xl font-bold text-yellow-600" id="totalCustomers">0</p>
+                    </div>
+                </div>
+
+                <!-- Best-Selling Products -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold mb-4 hover:text-black hover:font-bold">Top 10 Best-Selling Products</h2>
+                    <table class="table-auto w-full bg-gray-800 shadow-md rounded-lg overflow-hidden">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                                <th class="p-4 text-left hover:text-black hover:font-bold">Product Name</th>
+                                <th class="p-4 text-left hover:text-black hover:font-bold">Total Sold</th>
+                                <th class="p-4 text-left hover:text-black hover:font-bold">Total Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bestSellingProducts">
+                            <!-- Data will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Top-Selling Categories Table -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold mb-4 hover:text-black hover:font-bold">Top Best-Selling Categories</h2>
+                    <table class="table-auto w-full bg-gray-800 shadow-md rounded-lg overflow-hidden">
+                        <thead>
+                            <tr class="bg-gradient-to-r from-green-500 to-teal-500 text-white">
+                                <th class="p-4 text-left hover:text-black hover:font-bold">Category</th>
+                                <th class="p-4 text-left hover:text-black hover:font-bold">Total Sold</th>
+                                <th class="p-4 text-left hover:text-black hover:font-bold">Total Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bestSellingCategories">
+                            <!-- Data will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Best-Selling Categories Chart -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold mb-4 hover:text-black hover:font-bold">Top Best-Selling Categories - Graphical Representation</h2>
+                    <canvas id="categoryChart" class="bg-white p-6 rounded-lg shadow-md w-full sm:w-1/2 mx-auto"></canvas>
+                </div>
+
+                <!-- Top-Selling Products Chart -->
+                <div class="mt-8">
+                    <h2 class="text-xl font-bold mb-4 hover:text-black hover:font-bold">Top Best-Selling Products - Graphical Representation</h2>
+                    <!-- Increase the width to take full space -->
+                    <canvas id="productChart" class="bg-white p-6 rounded-lg shadow-md w-full sm:w-full md:w-3/4 lg:w-2/3 mx-auto"></canvas>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Fetch data based on the selected filter
+        let categoryChartInstance = null; // Declare a global variable for the chart instance
+        let productChartInstance = null; // Declare a global variable for the product chart instance
+
+        // Fetch data based on the selected filter
+        async function fetchDashboardData(filter) {
+            try {
+                const response = await axios.get(`/admin/dashboardData?filter=${filter}`);
+                const { totalSales, totalOrders, totalCustomers, bestSellingProducts, bestSellingCategories } = response.data;
+
+                // Update metrics
+                document.getElementById('totalSales').textContent = `₹${totalSales}`;
+                document.getElementById('totalOrders').textContent = totalOrders;
+                document.getElementById('totalCustomers').textContent = totalCustomers;
+
+                // Update products table
+                const productsTable = document.getElementById('bestSellingProducts');
+                productsTable.innerHTML = '';
+                bestSellingProducts.forEach(product => {
+                    const row = `
+                        <tr class="border-b hover:bg-gray-100">
+                            <td class="p-4">${product.name}</td>
+                            <td class="p-4">${product.totalSold}</td>
+                            <td class="p-4">₹${product.totalRevenue}</td>
+                        </tr>`;
+                    productsTable.innerHTML += row;
+                });
+
+                // Update categories table
+                const categoriesTable = document.getElementById('bestSellingCategories');
+                categoriesTable.innerHTML = '';
+                bestSellingCategories.forEach(category => {
+                    const row = `
+                        <tr class="border-b hover:bg-gray-100">
+                            <td class="p-4">${category.category}</td>
+                            <td class="p-4">${category.totalSold}</td>
+                            <td class="p-4">₹${category.totalRevenue}</td>
+                        </tr>`;
+                    categoriesTable.innerHTML += row;
+                });
+
+                // Update categories chart
+                const categoryLabels = bestSellingCategories.map(c => c.category);
+                const categoryData = bestSellingCategories.map(c => c.totalSold);
+
+                // If the chart already exists, destroy it before creating a new one
+                if (categoryChartInstance) {
+                    categoryChartInstance.destroy();
+                }
+
+                categoryChartInstance = new Chart(document.getElementById('categoryChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: categoryLabels,
+                        datasets: [{
+                            label: 'Total Sold',
+                            data: categoryData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                // Update products chart
+                const productLabels = bestSellingProducts.map(p => p.name);
+                const productData = bestSellingProducts.map(p => p.totalSold);
+
+                // If the chart already exists, destroy it before creating a new one
+                if (productChartInstance) {
+                    productChartInstance.destroy();
+                }
+
+                productChartInstance = new Chart(document.getElementById('productChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: productLabels,
+                        datasets: [{
+                            label: 'Total Sold',
+                            data: productData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Listen for time filter changes
+        document.getElementById('timeFilter').addEventListener('change', (e) => {
+            fetchDashboardData(e.target.value);
+        });
+
+        // Initial data fetch
+        fetchDashboardData('yearly');
+    </script>
+</body>
+</html>

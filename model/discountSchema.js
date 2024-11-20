@@ -11,6 +11,10 @@ const offerSchema = mongoose.Schema({
       type:String,
       required:true
   },
+  offerType:{
+    type:String,
+    enum:['percentage']
+  },
   discount:{
       type:Number,
       required:true

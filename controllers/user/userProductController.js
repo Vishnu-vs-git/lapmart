@@ -1,4 +1,5 @@
 const Product = require("../../model/productSchema");
+const Category = require("../../model/categorySchema");
 
 //.....> listing all products
 
@@ -7,6 +8,8 @@ exports.allproducts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 9;
     const skip = (page - 1) * limit;
+    const search = req.query.search || "";
+    const filterByCategory = req.query.category || "";
 
     const totalProducts = await Product.countDocuments();
 
@@ -18,7 +21,6 @@ exports.allproducts = async (req, res) => {
     ];
 
     const { sort } = req.query;
-    console.log(req.query);
     let sortCriteria;
 
     switch (sort) {
@@ -51,12 +53,17 @@ exports.allproducts = async (req, res) => {
         break;
     }
 
-    
+    const filterData = {};
 
-    const { filter } = req.query;
+    if (search) {
+      const regex = RegExp(search, "i");
+      filterData.name = regex;
+    }
+    if (filterByCategory) {
+      filterData.category = filterByCategory;
+    }
 
-    const filterData = filter ? { category: filter } : {};
-    console.log(filterData);
+    const categories = await Category.find();
 
     const products = await Product.find(filterData)
       .sort(sortCriteria)
@@ -68,11 +75,16 @@ exports.allproducts = async (req, res) => {
       breadcrumbs,
       currentPage: page,
       totalPages,
+      categories,
+      search,
+      filterByCategory,
     });
   } catch (error) {
     console.error(error);
   }
 };
+// Controller for handling product search
+
 exports.productList = async (req, res) => {
   try {
     const productId = req.params.id;

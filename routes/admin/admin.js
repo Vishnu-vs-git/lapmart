@@ -7,12 +7,16 @@ const {isAdmin} = require('../../middleware/admin');
 const adminOrderController=require('../../controllers/admin/adminOrderController');
 const adminCouponController=require('../../controllers/admin/adminCouponController');
 const adminofferController=require('../../controllers/admin/adminOfferController');
+const salesReportController=require('../../controllers/admin/salesReport controller')
+const validateDates=require('../../middleware/dateValidation')
+const adminDashboardController=require('../../controllers/admin/adminDashboardController')
 const multer = require('multer');
 const upload = multer();
 
 router.get('/login',adminController.loadLogin);
 router.post('/login',adminController.validateAdmin)
-router.get('/dashboard',isAdmin,adminController.getDashboard)
+router.get('/dashboard',isAdmin,adminDashboardController.renderDashboardPage )
+router.get('/dashboardData',isAdmin,adminDashboardController.getDashboardController )
 router.get('/customers',isAdmin,adminController.loadCustomers)
 router.get('/logout',adminController.getLogout)
 
@@ -47,6 +51,8 @@ router.get('/categoryDelete/:id',isAdmin,categoryController.deletecategory)
  router.post('/changeOrderstatus',isAdmin,adminOrderController.changeOrderStatus)
 
  router.post('/orderdetails',isAdmin,adminOrderController.getOrderDetails);
+ router.post('/acceptReturn',isAdmin,adminOrderController.acceptReturn)
+ router.post('/rejectReturn',isAdmin,adminOrderController.rejectReturn)
  
  
  router.get('/coupons',isAdmin,adminCouponController.getCoupons)
@@ -55,11 +61,21 @@ router.get('/categoryDelete/:id',isAdmin,categoryController.deletecategory)
  router.post('/couponstatusblock',isAdmin,adminCouponController.blockCoupon)
  router.post('/couponstatusUnblock',isAdmin,adminCouponController.UnblockCoupon)
  router.post('/removeCoupon',isAdmin,adminCouponController.removeCoupon)
- router.get('/editCoupon',isAdmin,adminCouponController.getEditCoupon)
+ router.get('/editCoupon/:id',isAdmin,adminCouponController.getEditCoupon)
+ router.post('/updateCoupon/:id',isAdmin,adminCouponController.postEditCoupon)
 
  router.get('/offers',isAdmin,adminofferController.getOffers)
- router.post('/addOffer',isAdmin,adminofferController.addOffer)
+ router.post('/addOffer',isAdmin,adminofferController.addOffer) 
+
+
+//------> sales report basedrouter.get('/sales-report', isAdmin, salesReportController.getSalesReport);
+router.get('/salesReport', isAdmin, salesReportController.getSalesReport);
+router.get('/sales-report/pdf', salesReportController.downloadSalesReportPDF);
+router.get('/sales-report/excel', salesReportController.downloadSalesReportExcel);
+
  
+router.use('/sales-report/pdf', validateDates);
+router.use('/sales-report/excel', validateDates);
 
 
 

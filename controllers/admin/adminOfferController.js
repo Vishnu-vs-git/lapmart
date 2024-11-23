@@ -22,7 +22,7 @@ exports.addOffer = async (req, res) => {
   try {
     const newOffer = new Offer({
       category,
-      offerName,
+      offerName,       
       discount,
       isActive: true, 
     });
@@ -32,7 +32,7 @@ exports.addOffer = async (req, res) => {
     const products = await Product.find({ category:  catename }); 
 
     products.forEach(async (product) => {
-       if(product. discountType==='percentage'){
+       if(product. discountType==='percentage'||product. discountType===null){
         console.log('current discount value',product.discountValue)
       product.discountValue = parseInt(product.discountValue || 0) + parseInt((100-product.discountValue)*discount/100);
       product.discountType='percentage'
@@ -170,8 +170,12 @@ async function updateProductPrice(offer) {
 
           // Update product fields
           product.discountValue = newDiscountRate.toFixed(2);  // Total discount in currency
-          product.finalPrice = (originalPrice - totalDiscountValue).toFixed(2); // Final price after all discounts
- // Effective discount percentage
+          product.finalPrice = (originalPrice - totalDiscountValue).toFixed(2); 
+         
+          console.log('product discount value in edit offer',product.discountvalue);
+
+          console.log('product final price',product.finalPrice);
+
 
           // Save the updated product
           await product.save(); // Use await here to save the changes to the database

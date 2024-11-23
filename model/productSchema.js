@@ -35,11 +35,7 @@ const productSchema=mongoose.Schema({
   category:[{
     type:String,
   }],
-  discount:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'Discount',
-    default:null
-  },
+ 
   reviews:[{
     userid:{type:mongoose.Schema.Types.ObjectId,ref:'User'},
     comment:{type:String},

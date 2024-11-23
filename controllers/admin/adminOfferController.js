@@ -108,3 +108,75 @@ const newStatus = !currentStatus;
       res.status(500).json({error:"internal server error"})
   }
 }
+
+exports.editOffer = async (req, res) => {
+  try {
+    const { offerId } = req.params;
+
+    // Check if offerId is provided
+    if (!offerId) {
+      return res.status(400).json({ error: 'Offer ID is not provided' });
+    }
+
+    const { category, offerName, offerType, discount, isActive } = req.body;
+
+    // Check for required fields
+    if (!category || !offerName || !offerType || !discount) {
+      return res.status(400).json({ error: 'Some required fields are missing' });
+    }
+
+    // Update the offer
+    const offer = await Offer.findByIdAndUpdate(
+      offerId,
+      { category, offerName, offerType, discount, isActive },
+      { new: true } // Return the updated document
+    );
+
+    // If offer doesn't exist, return an error
+    if (!offer) {
+      return res.status(404).json({ error: 'Offer not found' });
+    }
+
+    // If the offer type is 'percentage', update product prices
+    if (offer.offerType === 'percentage') {
+      await updateProductPrice(offer);
+    }
+
+    res.status(200).json({ message: 'Offer updated successfully' });
+  } catch (error) {
+    console.error('Error in editing offer:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+async function updateProductPrice(offer) {
+  try {
+    
+      const products = await Product.find({ category: offer.category, status: 'Active' });
+
+      for (let product of products) {
+   
+          const originalPrice = product.price; 
+          const finalPrice = product.finalPrice || originalPrice; // Use finalPrice if available, else originalPrice
+          const discountValue = originalPrice - finalPrice; // Existing discount already applied
+
+          // Calculate the new offer's effect
+          const offerRate = offer.discount; // Percentage offer from the new offer
+          const offerValue = finalPrice * (offerRate / 100); // Apply the discount on the current finalPrice
+          const totalDiscountValue = discountValue + offerValue; // Accumulated discount value
+
+          // Recalculate the discount rate
+          const newDiscountRate = (totalDiscountValue / originalPrice) * 100;
+
+          // Update product fields
+          product.discountValue = newDiscountRate.toFixed(2);  // Total discount in currency
+          product.finalPrice = (originalPrice - totalDiscountValue).toFixed(2); // Final price after all discounts
+ // Effective discount percentage
+
+          // Save the updated product
+          await product.save(); // Use await here to save the changes to the database
+      }
+  } catch (error) {
+      console.error('Error updating product prices:', error);
+  }
+}

@@ -26,7 +26,7 @@ app.use(morgan("dev"));
 
 mongoose
   .connect(process.env.MONGOURI)
-  .then(() => {
+  .then(() => {  
    console.log("Connected to MongoDB");
   })
   .catch((err) => {

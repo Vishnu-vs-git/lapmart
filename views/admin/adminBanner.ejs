@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LapMart - Banner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+    <div class="flex h-screen">
+        <%- include('../partials/adminSidebar') %>
+        <div class="flex-1 p-8">
+            <%- include('../partials/adminLoginIcon') %>
+            <h1 class="text-4xl font-bold text-orange-400 mb-4">Banner Management</h1>
+
+
+            <div class="mt-4 mb-4">
+                <a href="/admin/addBanner" class="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-600">
+                    Add New Banner
+                </a>
+            </div>
+
+            <!-- banner-list.ejs -->
+            <div class="overflow-x-auto bg-gray-800 rounded-lg shadow-lg">
+                <table class="min-w-full table-auto text-sm">
+                    <thead class="bg-gray-700 text-gray-200">
+                        <tr>
+                            <th class="py-3 px-4 text-left">Title</th>
+                            <th class="py-3 px-4 text-left">Description</th>
+                            <th class="py-3 px-4 text-left">Image</th>
+                            <th class="py-3 px-4 text-left">Status</th>
+                            <th class="py-3 px-4 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% banners.forEach(banner => { %>
+                        <tr class="border-t border-gray-700 hover:bg-gray-700">
+                            <td class="py-3 px-4"><%= banner.title %></td>
+                            <td class="py-3 px-4"><%= banner.description %></td>
+                            <td class="py-3 px-4">
+                                <img src="<%= banner.titleImages %>" alt="Banner Image" width="50" class="rounded-lg shadow-md">
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full
+                                    <%= banner.status ? 'bg-green-500 text-green-800' : 'bg-red-500 text-red-800' %>">
+                                    <%= banner.status ? 'Enabled' : 'Disabled' %>
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 space-x-2">
+                                <!-- Edit Button -->
+                                <a href="/admin/editBanner/<%= banner._id %>" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg text-xs">Edit</a>
+
+                                <!-- Delete Button -->
+                                <button onclick="deleteBanner('<%= banner._id %>')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-xs">Delete</button>
+
+                                <!-- Toggle Status Button -->
+                                <button onclick="toggleBannerStatus('<%= banner._id %>', <%= banner.status %>)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-xs">
+                                    <%= banner.status ? 'Disable' : 'Enable' %>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-center">
+                <% if (currentPage > 1) { %>
+                    <a href="/admin/bannerList?page=<%= currentPage - 1 %>"
+                        class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-900">
+                        Previous
+                    </a>
+                <% } %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <a href="/admin/bannerList?page=<%= i %>"
+                        class="<%= i === currentPage ? 'bg-blue-600' : 'bg-gray-700' %> text-white px-3 py-1 rounded hover:bg-gray-600">
+                        <%= i %>
+                    </a>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                    <a href="/admin/bannerList?page=<%= currentPage + 1 %>"
+                        class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-600">
+                        Next
+                    </a>
+                <% } %>
+            </div>
+            
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        <% if (messages){%>
+       
+            Swal.fire({
+                icon:'success',
+                text: '<%= messages %>',
+                timer:3000
+            })
+            <% } %>
+        </script>
+    
+    <script>
+     // Delete Banner
+function deleteBanner(id) {
+    Swal.fire({
+        icon: 'warning',
+        text: 'Are you sure you want to delete the banner?',
+        showConfirmButton: true,
+        confirmButtonText: 'Ok', // Fixed property name
+        showCancelButton: true,
+        cancelButtonText: "Cancel" // Fixed property name
+    }).then((result) => {
+        if (result.isConfirmed) {
+            axios.delete(`/admin/deleteBanner/${id}`)
+                .then(response => {
+                    Swal.fire({
+                        icon: 'success',
+                        text: "Banner deleted successfully"
+                    }).then(() => {
+                        location.reload(); // Reload the page after success
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    Swal.fire({
+                        icon: 'error',
+                        text: 'An error occurred while deleting the banner.',
+                        confirmButtonText: 'Ok'
+                    });
+                });
+        }
+    });
+}
+
+
+        // Toggle Banner Status (Enable/Disable)
+        function toggleBannerStatus(id, currentStatus) {
+            const newStatus = currentStatus ? false : true; // Toggle the status
+            axios.patch(`/admin/ChangeBannerStatus/${id}`, { status: newStatus })
+                .then(response => {
+                    Swal.fire({
+                        icon:'success',
+                        title:'Success',
+                        text:response.data.success,
+                        timer:3000
+                    }).then(()=>{
+                        location.reload();
+                    })
+                    // alert(response.data.message);
+                     // Reload the page to reflect changes
+                })
+                .catch(error => {
+                    console.log(error);
+                    Swal.fire({
+                        icon:'error',
+                        title:'Error',
+                        text:"an error occured while changing the banner status_",
+                        timer:3000
+                    })
+                   
+                });
+        }
+    </script>
+</body>
+
+</html>

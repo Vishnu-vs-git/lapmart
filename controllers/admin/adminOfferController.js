@@ -59,3 +59,52 @@ exports.addOffer = async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 };
+
+exports.deleteOffer=async(req,res)=>{
+   try{
+    console.log('hi from delete')
+  const{offerId}=req.params;
+
+    if(!offerId){
+      return res.status(400).json({error:'Offer id not found'});
+    }
+    const offer=await Offer.findByIdAndDelete(offerId);
+
+    if(!offer){
+      return res.status(404).json({success:false,message:'Offer not found'});
+    }
+    res.status(200).json({success:true,message:'offer deleted successfully'})
+
+
+}catch(error){
+  console.error('Error in deleting offer',error)
+  res.status(500).json({error:'internal server error'})
+}
+}
+exports.changeOfferStatus=async(req,res)=>{
+  try{
+    const{offerId}=req.params;
+    if(!offerId){
+        return res.status(400).json({error:'offer id is not available'});
+    }
+
+    const{changeStatus}=req.body
+    console.log('current status in offer',changeStatus);
+
+    const currentStatus = changeStatus === "true" || changeStatus === true;
+const newStatus = !currentStatus;
+
+    const offer=await Offer.findByIdAndUpdate(offerId,{isActive:newStatus},{new:true}) ; 
+
+     if(!offer){
+      return res.status(404).json({error:'offer not found'});
+     }
+     res.status(200).json({success:true,message:'Status changed status successfully',isActive: newStatus})
+
+
+
+  }catch(error){
+      console.error('error in changing status',error);
+      res.status(500).json({error:"internal server error"})
+  }
+}

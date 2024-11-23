@@ -17,7 +17,7 @@ const checkUser= require('../../middleware/checkuser')
 
 router.use(checkUser.checkuser)
 
-  router.use(blockUser)
+  router.use('/user',blockUser)
 
 
 router.get('/',userController.userHome)
@@ -39,8 +39,8 @@ router.get('/login',userController.loadLogin)
  
  
  router.get('/home',isUser,userController.userHome)
- router.get('/products',userProductcontroller.allproducts)
- router.get('/products/:id',userProductcontroller.productList)
+ router.get('/products',blockUser,userProductcontroller.allproducts)
+ router.get('/products/:id',blockUser,userProductcontroller.productList)
 
 
 // Initiate Google Authentication

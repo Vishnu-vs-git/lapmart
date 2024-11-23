@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Banner</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            midnight: { DEFAULT: '#1E293B', lighter: '#334155' },
+            ocean: { DEFAULT: '#0284C7', secondary: '#06B6D4' },
+            highlight: { DEFAULT: '#FACC15', accent: '#FDE047' }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+
+<body class="bg-black text-gray-100 min-h-screen">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-black bg-opacity-80 border-r border-gray-800 shadow-2xl">
+      <%- include('../partials/adminSidebar') %>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8">
+      <!-- Admin Icons -->
+      <div class="flex justify-end mb-8">
+        <%- include('../partials/adminLoginIcon') %>
+      </div>
+
+      <!-- Banner Edit Card -->
+      <div class="max-w-xl mx-auto">
+        <div class="bg-gray-900 border-4 border-yellow-500 bg-opacity-60 rounded-2xl p-6 shadow-lg border border-gray-700">
+          <h1 class="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-ocean to-highlight bg-clip-text text-transparent">
+            Edit Banner
+          </h1>
+          <form id="edit-banner-form" enctype="multipart/form-data" action="/admin/editBanner/<%= banner._id %>" method="POST" class="space-y-6">
+            <!-- Title Input -->
+            <div>
+              <label for="title" class="block text-lg font-bold text-white">Title</label>
+              <input type="text" id="title" name="title" value="<%= banner.title %>" placeholder="Enter banner title" class="w-full px-4 py-3 bg-midnight text-white border rounded-lg focus:ring-2 focus:ring-highlight focus:border-highlight">
+            </div>
+      
+            <!-- Description Input -->
+            <div>
+              <label for="description" class="block text-lg font-bold text-white">Description</label>
+              <textarea id="description" name="description" rows="3" placeholder="Enter description" class="w-full px-4 py-3 bg-midnight text-white border rounded-lg focus:ring-2 focus:ring-highlight focus:border-highlight"><%= banner.description %></textarea>
+            </div>
+      
+            <!-- Image Upload -->
+            <div>
+              <label for="image" class="block text-lg font-bold text-white">Upload Image</label>
+              <input type="file" id="image" name="banner" accept="image/*" class="w-full px-4 py-3 bg-midnight text-gray-300 border rounded-lg file:bg-highlight file:text-midnight file:rounded-lg">
+              <% if (banner.image) { %>
+              <img src="/<%= banner.image %>" alt="Banner" class="rounded-lg shadow-md mt-4">
+              <% } %>
+            </div>
+      
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-gradient-to-r from-ocean to-highlight text-white text-lg font-semibold py-3 rounded-lg hover:shadow-md">
+              Update Banner
+            </button>
+          </form>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  <script>
+    document.getElementById('edit-banner-form').addEventListener('submit', function (e) {
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const image = document.getElementById('image').files[0];
+
+      let isValid = true;
+
+      // Title Validation
+      const titleError = document.getElementById('title-error');
+      const titleRegex = /^[A-Z][a-zA-Z\s]{0,14}$/;
+      if (!titleRegex.test(title)) {
+        titleError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        titleError.classList.add('hidden');
+      }
+
+      // Description Validation
+      const descriptionError = document.getElementById('description-error');
+      const descriptionRegex = /^[A-Z][a-zA-Z\s0-9]{0,29}$/;
+      if (!descriptionRegex.test(description)) {
+        descriptionError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        descriptionError.classList.add('hidden');
+      }
+
+      // Image Validation
+      const imageError = document.getElementById('image-error');
+      const allowedExtensions = ['jpeg', 'jpg', 'png'];
+      if (image && !allowedExtensions.includes(image.name.split('.').pop().toLowerCase())) {
+        imageError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        imageError.classList.add('hidden');
+      }
+
+      if (!isValid) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+
+</html>

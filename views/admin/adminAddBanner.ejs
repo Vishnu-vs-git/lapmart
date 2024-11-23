@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Banner</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Include Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-black text-white">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-black">
+      <%- include('../partials/adminSidebar') %>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-8">
+      <!-- Admin Icons -->
+      <div class="flex justify-end mb-6">
+        <%- include('../partials/adminLoginIcon') %>
+      </div>
+
+      <div class="bg-black text-white font-bold border-2 border-yellow-500 shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-center text-white mb-6">Add New Banner</h1>
+      
+        <!-- Banner Form -->
+        <form id="add-banner-form" enctype="multipart/form-data" action="/admin/addBanner" method="POST" class="space-y-6">
+          <!-- Title -->
+          <div>
+            <label for="title" class="block text-sm font-bold text-black">Title</label>
+            <input type="text" id="title" name="title" placeholder="Enter banner title"
+              class="mt-1 text-black block w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <p id="title-error" class="text-red-500 text-sm hidden">Invalid title: must be less than 15 words, start with an
+              uppercase letter, and contain only letters.</p>
+          </div>
+      
+          <!-- Description -->
+          <div>
+            <label for="description" class="block text-sm font-bold text-black">Description</label>
+            <textarea id="description"  name="description" rows="4" placeholder="Enter banner description"
+              class="mt-1 block text-black w-full border-gray-300   shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+            <p id="description-error" class="text-red-500 text-sm hidden">Invalid description: must be less than 30 words,
+              start with an uppercase letter, and contain only words or positive integers.</p>
+          </div>
+      
+          <!-- Image Upload -->
+          <div>
+            <label for="image" class="block text-sm font-bold text-black">Banner Image</label>
+            <input type="file" id="image" name="banner" accept="image/*"
+              class="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer focus:outline-none">
+            <p id="image-error" class="text-red-500 text-sm hidden">Invalid image: must be of type jpeg, jpg, or png.</p>
+          </div>
+      
+          <!-- Submit Button -->
+          <div>
+            <button type="submit"
+              class="w-full bg-green-500 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300">
+              Add Banner
+            </button>
+          </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('add-banner-form').addEventListener('submit', function (e) {
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const image = document.getElementById('image').files[0];
+
+      // Validation flags
+      let isValid = true;
+
+      // Title Validation
+      const titleError = document.getElementById('title-error');
+      const titleRegex = /^[A-Z][a-zA-Z\s]{0,14}$/; // Starts with uppercase and contains only letters, max 15 words
+      if (!titleRegex.test(title)) {
+        titleError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        titleError.classList.add('hidden');
+      }
+
+      // Description Validation
+      const descriptionError = document.getElementById('description-error');
+      const descriptionRegex = /^[A-Z][a-zA-Z\s0-9]{0,29}$/; // Starts with uppercase, max 30 words, letters/positive integers
+      if (!descriptionRegex.test(description)) {
+        descriptionError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        descriptionError.classList.add('hidden');
+      }
+
+      // Image Validation
+      const imageError = document.getElementById('image-error');
+      const allowedExtensions = ['jpeg', 'jpg', 'png'];
+      if (!image || !allowedExtensions.includes(image.name.split('.').pop().toLowerCase())) {
+        imageError.classList.remove('hidden');
+        isValid = false;
+      } else {
+        imageError.classList.add('hidden');
+      }
+
+      // If not valid, prevent form submission
+      if (!isValid) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+
+</html>

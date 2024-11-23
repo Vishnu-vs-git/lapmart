@@ -261,6 +261,7 @@ const userLogin = async (req, res) => {
       });
     }
     req.session.user = user;
+    req.session.user.IsBlocked = user.isBlocked;
     req.session.message={type:'success',text:'user Logged in successfully'}
     return res.redirect("/user/home");
   } catch (error) {

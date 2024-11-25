@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
 const Product=require('../../model/productSchema')
+const Wallet=require('../../model/walletSchema')
 const Banner=require('../../model/bannerSchema');
 dotenv.config();
 let msg = "";
@@ -156,6 +157,19 @@ const verifyOtp = async (req, res) => {
         });
 
         const userData = await user.save();
+      const  wallet = new Wallet({
+          userId:userData._id,
+          balance: 0,
+          transaction: [
+            {
+              walletamount: 0,
+              transactionType: "null",
+              // orderId,
+              transactionDate: Date.now(),
+            },
+          ],
+        });
+        await wallet.save();
 
         req.session.user_id = userData._id;
         res.redirect("/user/login");

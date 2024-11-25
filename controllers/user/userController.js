@@ -160,14 +160,14 @@ const verifyOtp = async (req, res) => {
       const  wallet = new Wallet({
           userId:userData._id,
           balance: 0,
-          transaction: [
-            {
-              walletamount: 0,
-              transactionType: "null",
-              // orderId,
-              transactionDate: Date.now(),
-            },
-          ],
+          // transaction: [
+          //   {
+          //     walletamount: 0,
+          //     transactionType: "null",
+          //     // orderId,
+          //     transactionDate: Date.now(),
+          //   },
+          // ],
         });
         await wallet.save();
 

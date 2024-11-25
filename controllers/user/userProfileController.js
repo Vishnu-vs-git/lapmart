@@ -177,7 +177,7 @@ exports.getChangePassword = async(req,res)=>{
       const messages=(req.session.messages)
       delete req.session.message;
       delete req.session.messages
-      res.render('user/userPasswordchange',{message,messages})
+      res.render('user/userPasswordChange',{message,messages})
    }catch(error){
       console.error('Error in changing password',error);
     res.status(500).send('Some errors happened')

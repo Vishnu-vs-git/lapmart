@@ -23,7 +23,7 @@ const walletSchema = new mongoose.Schema(
         },
         transactionType: {
           type: String,
-          enum: ["Credited", "Debited"], // Removed `null` from enum
+          enum: ["Credited", "Debited","null"], // Removed `null` from enum
         },
         transactionDate: {
           type: Date,

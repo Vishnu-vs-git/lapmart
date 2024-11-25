@@ -56,7 +56,8 @@
       <!-- Wallet Balance Card -->
       <div class="achu text-white rounded-lg shadow-lg p-6 mb-6 text-center">
         <h2 class="text-2xl font-semibold">Wallet Balance</h2>
-        <p class="text-4xl font-bold mt-2">₹<%= walletItems.balance.toFixed(2) %></p>
+        <p class="text-4xl font-bold mt-2">₹<%= (walletItems.balance ? walletItems.balance.toFixed(2) : 0).toFixed(2) %></p>
+
       </div>
 
       <!-- Add Money Button -->

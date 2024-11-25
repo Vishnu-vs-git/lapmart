@@ -1,6 +1,7 @@
 const Product = require("../../model/productSchema");
 const Category = require("../../model/categorySchema");
 
+
 //.....> listing all products
 
 exports.allproducts = async (req, res) => {
@@ -12,6 +13,7 @@ exports.allproducts = async (req, res) => {
     const filterByCategory = req.query.category || "";
 
     const totalProducts = await Product.countDocuments();
+   
 
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -78,6 +80,7 @@ exports.allproducts = async (req, res) => {
       categories,
       search,
       filterByCategory,
+      
     });
   } catch (error) {
     console.error(error);

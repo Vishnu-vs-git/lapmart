@@ -176,7 +176,7 @@ async function updateProductPrice(offer) {
 
           console.log('product final price',product.finalPrice);
 
-
+ 
           // Save the updated product
           await product.save(); // Use await here to save the changes to the database
       }

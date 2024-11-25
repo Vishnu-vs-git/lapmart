@@ -12,15 +12,40 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        let user = await User.findOne({ googleId: profile.id });
-        if (!user) {
+      
+        // // let user = await User.findOne({ googleId: profile.id });
+         let user = await User.findOne({ email:profile.emails[0].value });
+
+        // if (!user) {
+        //   user = await User.create({
+        //     googleId: profile.id,
+        //     userName: profile.displayName,
+        //     email: profile.emails[0].value,
+        //   });
+        // }
+        // done(null, user);
+        if (user) {
+          // Update the existing user with the Google ID if not already linked
+          if (!user.googleId) {
+            user.googleId = profile.id;
+            await user.save();
+          }
+          done(null, user);
+          console.log("User already exists, proceeding with login...");
+        } else {
           user = await User.create({
-            googleId: profile.id,
-            name: profile.displayName,
-            email: profile.emails[0].value,
-          });
-        }
+              googleId: profile.id,
+                userName: profile.displayName,
+                email: profile.emails[0].value,
+          
+        })
         done(null, user);
+
+        console.log("New user created:", user);
+      }
+
+
+
       } catch (err) {
         done(err, false);
       }

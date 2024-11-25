@@ -276,10 +276,10 @@ const userHome = async (req, res) => {
   try {
     const message=req.session.message||null
     req.session.message=null
-    const banner=await Banner.findOne({title:"Festivale Sale",status:true})
+    const banners=await Banner.findOne({title:"Festivale Sale",status:true})
     const blockbusterDeals = await Product.find({isfeatured:true}).limit(5);
     const newArrivals = await Product.find().sort({createdAt:-1}).limit(5);
-    res.render("user/userHome", { blockbusterDeals, newArrivals, message,banner });
+    res.render("user/userHome", { blockbusterDeals, newArrivals, message,banners });
   } catch (error) {
     console.error(error);
     return res.status(500).send("server error" + "hello");

@@ -6,9 +6,11 @@ const Product=require('../../model/productSchema');
 
 exports.getOffers = async (req, res) => {
   try {
+    const message=req.session.message||"";
+    delete req.session.message;
     const categories = await Category.find(); 
     const offers = await Offer.find().populate('category'); 
-    res.render('admin/adminOffer', { categories, offers });
+    res.render('admin/adminOffer', { categories, offers,message });
   } catch (error) {
     console.error('Error fetching offers:', error);
     res.status(500).send('Internal Server Error');
@@ -109,19 +111,48 @@ const newStatus = !currentStatus;
   }
 }
 
-exports.editOffer = async (req, res) => {
+exports.getEditOffer=async(req,res)=>{
+  try{
+    const{offerId}=req.params;
+    if(!offerId){
+      return res.status(400).json({error:'offerId not found'});
+    }
+    const offer=await Offer. findById(offerId).populate('category');
+    if(!offer){
+      return res.status(400).json({error:'offer not found'});
+    }
+    const categories=await Category.find({});
+
+    if(!categories){
+      return res.status(400).json({error:'categories  not found'});
+    }
+    res.render('admin/editOffer',{offer,categories})
+
+
+  }catch(error){
+
+    console.error('error in getting edit offer page',error)
+  }
+}
+
+
+
+
+
+exports.postEditOffer = async (req, res) => {
   try {
     const { offerId } = req.params;
-
+console.log('hellooo from edit offer')
     // Check if offerId is provided
     if (!offerId) {
       return res.status(400).json({ error: 'Offer ID is not provided' });
     }
 
     const { category, offerName, offerType, discount, isActive } = req.body;
+    console.log('req body in edit offer',req.body)
 
     // Check for required fields
-    if (!category || !offerName || !offerType || !discount) {
+    if (!category || !offerName  || !discount) {
       return res.status(400).json({ error: 'Some required fields are missing' });
     }
 
@@ -130,7 +161,7 @@ exports.editOffer = async (req, res) => {
       offerId,
       { category, offerName, offerType, discount, isActive },
       { new: true } // Return the updated document
-    );
+    ).populate('category')
 
     // If offer doesn't exist, return an error
     if (!offer) {
@@ -138,11 +169,13 @@ exports.editOffer = async (req, res) => {
     }
 
     // If the offer type is 'percentage', update product prices
-    if (offer.offerType === 'percentage') {
-      await updateProductPrice(offer);
-    }
+    // if (offer.offerType === 'percentage') {
+      const result=await updateProductPrice(offer);
+      console.log('result in editttt',result)
+    // } 
+    req.session.message='offer Updated successfully'
 
-    res.status(200).json({ message: 'Offer updated successfully' });
+      res.redirect('/admin/offers')
   } catch (error) {
     console.error('Error in editing offer:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -152,7 +185,8 @@ exports.editOffer = async (req, res) => {
 async function updateProductPrice(offer) {
   try {
     
-      const products = await Product.find({ category: offer.category, status: 'Active' });
+      const products = await Product.find({ category: offer.category.name, status: 'Active' });
+      console.log('products in edit offer',products)
 
       for (let product of products) {
    
@@ -161,8 +195,12 @@ async function updateProductPrice(offer) {
           const discountValue = originalPrice - finalPrice; // Existing discount already applied
 
           // Calculate the new offer's effect
+          
           const offerRate = offer.discount; // Percentage offer from the new offer
+          console.log('offer rate in edit',offerRate)
+          console.log('discount value in edit',discountValue)
           const offerValue = finalPrice * (offerRate / 100); // Apply the discount on the current finalPrice
+          console.log('discount value in offerValue',offerValue)
           const totalDiscountValue = discountValue + offerValue; // Accumulated discount value
 
           // Recalculate the discount rate
@@ -179,8 +217,90 @@ async function updateProductPrice(offer) {
  
           // Save the updated product
           await product.save(); // Use await here to save the changes to the database
+        
       }
   } catch (error) {
       console.error('Error updating product prices:', error);
   }
 }
+
+//---------------> changed offer
+// exports.postEditOffer = async (req, res) => {
+//   const { offerId } = req.params;
+//   const { category, offerName, discount } = req.body;
+
+//   console.log('hello from edit offer');
+  
+//   try {
+//     // Fetch the existing offer
+//     const existingOffer = await Offer.findById(offerId);
+//     if (!existingOffer) {
+//       return res.status(404).json({ error: 'Offer not found' });
+//     }
+
+//     const oldCategoryId = existingOffer.category; // Old category ID
+//     const oldDiscount = existingOffer.discount; // Old discount value
+
+//     // Fetch the old category name
+//     const oldCategory = await Category.findById(oldCategoryId);
+//     const oldCategoryName = oldCategory.name;
+
+//     // Fetch products under the old category
+//     const oldProducts = await Product.find({ category: oldCategoryName });
+
+//     // Revert the effects of the old offer
+//     oldProducts.forEach(async (product) => {
+//       if (product.discountType === 'percentage') {
+//         // Revert percentage discount
+//         const currentDiscountValue = parseInt(product.discountValue || 0);
+//         const revertValue = (currentDiscountValue / (100 - oldDiscount)) * 100;
+//         product.finalPrice = parseInt(product.price) - parseInt(revertValue);
+//         product.discountValue = 0;
+//         product.discountType = null;
+//       } else if (product.discountType === 'fixed') {
+//         // Revert fixed discount
+//         product.finalPrice = parseInt(product.price) + parseInt(product.discountValue);
+//         product.discountValue = 0;
+//         product.discountType = null;
+//       }
+//       await product.save();
+//     });
+
+//     // Update the offer
+//     existingOffer.category = category;
+//     existingOffer.offerName = offerName;
+//     existingOffer.discount = discount;
+//     await existingOffer.save();
+
+//     // Fetch the new category name
+//     const newCategory = await Category.findById(category);
+//     const newCategoryName = newCategory.name;
+
+//     // Fetch products under the new category
+//     const newProducts = await Product.find({ category: newCategoryName });
+
+//     // Apply the new offer
+//     newProducts.forEach(async (product) => {
+//       if (product.discountType === 'percentage' || product.discountType === null) {
+//         const currentDiscountValue = parseInt(product.discountValue || 0);
+//         const newDiscountValue = parseInt((100 - currentDiscountValue) * discount / 100);
+//         product.discountValue = currentDiscountValue + newDiscountValue;
+//         product.discountType = 'percentage';
+//         product.finalPrice = parseInt(product.price) - parseInt(product.discountValue);
+//       } else if (product.discountType === 'fixed') {
+//         const currentDiscountValue = parseInt(product.discountValue || 0);
+//         const newDiscountValue = parseInt((product.price - currentDiscountValue) * discount / 100);
+//         product.discountValue = currentDiscountValue + newDiscountValue;
+//         product.finalPrice = parseInt(product.price) - parseInt(product.discountValue);
+//       }
+//       await product.save();
+//     });
+
+//     console.log('Offer and products updated successfully');
+//     req.session.message = 'Offer updated successfully';
+//     res.redirect('/admin/offers');
+//   } catch (error) {
+//     console.error('Error editing offer:', error);
+//     res.status(500).send('Internal Server Error');
+//   }
+// };

@@ -99,6 +99,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
+    const message = "<%= message %>";
+    if (message) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: message,
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    }
+  </script>
+  <script>
+   
   async function toggleOfferStatus(offerId, changeStatus) {
   try {
     console.log(`Toggling offer status for ID: ${offerId}, Current Status: ${changeStatus}`);
@@ -218,6 +231,21 @@
       icon: 'error',
       title: 'Error',
       text: 'An error occurred while deleting the offer. Please try again.',
+    });
+  }
+}
+
+ function changeData(offerId) {
+  try{
+    window.location.href = `/admin/editOffer/${offerId}`;
+  
+    }
+
+  catch(error){
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'An error in rendering  the  edit offer. Please try again.',
     });
   }
 }

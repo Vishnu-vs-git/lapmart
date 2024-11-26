@@ -90,7 +90,9 @@ router.post("/updateCoupon/:id", isAdmin, adminCouponController.postEditCoupon);
 router.get("/offers", isAdmin, adminofferController.getOffers);
 router.post("/addOffer", isAdmin, adminofferController.addOffer);
 router.delete('/deleteOffer/:offerId',isAdmin,adminofferController.deleteOffer)
-router.patch('/changeOfferstatus/:offerId',isAdmin,adminofferController.changeOfferStatus)
+router.patch('/changeOfferstatus/:offerId',isAdmin,adminofferController.changeOfferStatus);
+router.get('/editOffer/:offerId',isAdmin,adminofferController.getEditOffer)
+router.post('/editOffer/:offerId',isAdmin,adminofferController.postEditOffer)
 
 //------> sales report basedrouter.get('/sales-report', isAdmin, salesReportController.getSalesReport);
 router.get("/salesReport", isAdmin, salesReportController.getSalesReport);
@@ -99,7 +101,7 @@ router.get(
   "/sales-report/excel",
   salesReportController.downloadSalesReportExcel
 );
-
+                  
 router.use("/sales-report/pdf", validateDates);
 router.use("/sales-report/excel", validateDates);
 

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Offer</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div class="flex">
+    <!-- Admin Sidebar -->
+    <%- include('../partials/adminSidebar') %>
+
+    <!-- Main Content -->
+    <div class="flex-1">
+      <!-- Top Bar with Admin Icon -->
+      <header class="flex justify-end bg-white shadow p-4">
+        <%- include('../partials/adminLoginIcon') %>
+      </header>
+
+      <section class="p-8">
+        <h1 class="text-2xl font-bold mb-6">Edit Offer</h1>
+        
+        <!-- Form to edit the offer -->
+        <form action="/admin/editOffer/<%= offer._id %>" method="POST" class="bg-white shadow rounded-lg p-6">
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <!-- Category Selection -->
+            <div>
+              <label for="category" class="block text-sm font-medium text-gray-700">Category:</label>
+              <select name="category" id="category" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                <% categories.forEach(category => { %>
+                  <option value="<%= category._id %>" <%= category._id === offer.category._id ? 'selected' : '' %>>
+                    <%= category.name %>
+                  </option>
+                <% }); %>
+              </select>
+            </div>
+
+            <!-- Offer Name -->
+            <div>
+              <label for="offerName" class="block text-sm font-medium text-gray-700">Offer Name:</label>
+              <input type="text" name="offerName" id="offerName" required 
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                value="<%= offer.offerName %>">
+            </div>
+
+            <!-- Discount -->
+            <div>
+              <label for="discount" class="block text-sm font-medium text-gray-700">Discount (%):</label>
+              <input type="number" name="discount" id="discount" min="1" max="100" required 
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
+                value="<%= offer.discount %>">
+            </div>
+          </div>
+          
+          <!-- Submit Button -->
+          <button type="submit" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+            Update Offer
+          </button>
+        </form>
+      </section>
+    </div>
+  </div>
+  <script src="https://cdn.tailwindcss.com"></script>
+</body>
+</html>

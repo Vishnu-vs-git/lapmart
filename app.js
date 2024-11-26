@@ -21,8 +21,9 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // Middleware to serve static files (like CSS, images)
-app.use(express.static(path.join(__dirname, "public")));
-app.use(morgan("dev"));
+app.use(express.static(path.join(__dirname, "public")));      
+      
+
 
 mongoose
   .connect(process.env.MONGOURI)
@@ -60,7 +61,7 @@ app.use(authRoutes);
 
 app.use(userRouter);
 app.use("/admin", adminRouter);
-app.use("/user", userRouter);
+app.use("/user", userRouter);               
 app.use("*", (req, res) => {
   res.render("user/servererror");
 });
@@ -70,3 +71,4 @@ const port = 7010;
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+                       

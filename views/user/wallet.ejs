@@ -56,7 +56,7 @@
       <!-- Wallet Balance Card -->
       <div class="achu text-white rounded-lg shadow-lg p-6 mb-6 text-center">
         <h2 class="text-2xl font-semibold">Wallet Balance</h2>
-        <p class="text-4xl font-bold mt-2">₹<%= (walletItems.balance ? walletItems.balance.toFixed(2) : 0).toFixed(2) %></p>
+        <p class="text-4xl font-bold mt-2">₹<%= walletItems.balance ? walletItems.balance.toFixed(2) : 0 %></p>
 
       </div>
 
@@ -104,6 +104,18 @@
         <p class="text-gray-500 text-center">No transactions found.</p>
       <% } %>
     </div>
+    
   </div>
+  <!-- Pagination -->
+ <div class="flex justify-center mt-4 space-x-2">
+  <% if (currentPage > 1) { %>
+    <a href="/uwallet?page=<%= currentPage - 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Previous</a>
+  <% } %>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="/wallet?page=<%= i %>" class="px-4 py-2 rounded <%= i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black hover:bg-gray-400' %>"><%= i %></a>
+  <% } %>
+  <% if (currentPage < totalPages) { %>
+    <a href="/wallet?page=<%= currentPage + 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Next</a>
+  <% } %>
 </body>
 </html>

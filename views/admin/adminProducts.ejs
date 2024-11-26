@@ -45,7 +45,7 @@
                 <tbody>
                     <% products.forEach((product, index) => { %>
                         <tr class="border-b border-gray-700">
-                            <td class="px-4 py-2"><%= index + 1 %></td>
+                            <td class="px-4 py-2"><%= startIndex + index %></td>
                             <td class="px-4 py-2"><%= product.name %></td>
                             <td class="px-4 py-2">₹ <%= product.price %></td>
                             <td class="px-4 py-2"><%= product.quantity > 0 ? product.quantity : 'Out of Stock' %></td>
@@ -73,6 +73,17 @@
                     <% }) %>
                 </tbody>
             </table>
+             <!-- Pagination -->
+ <div class="flex justify-center mt-4 space-x-2">
+    <% if (currentPage > 1) { %>
+      <a href="/admin/Products?page=<%= currentPage - 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Previous</a>
+    <% } %>
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <a href="/admin/Products?page=<%= i %>" class="px-4 py-2 rounded <%= i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black hover:bg-gray-400' %>"><%= i %></a>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+      <a href="/admin/Products?page=<%= currentPage + 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Next</a>
+    <% } %>
 
            
         </div>

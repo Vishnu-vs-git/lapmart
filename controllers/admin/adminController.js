@@ -37,18 +37,27 @@ exports.validateAdmin = async (req, res) => {
 
 exports.loadCustomers = async (req,res) => {
   try {
-    let customers = await User.find().populate('address').lean()
-    console.log(customers)
+    const page = parseInt(req.params.page);
+    const limit=8;
+    const skip=(page-1)*limit;
+    const totalCustomer= await User.countDocuments();
+    const totalPages= Math.ceil(totalCustomer / limit);
+    let customers = await User.find().populate('address').skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+   
 customers.forEach(customer => {
   console.log(`Customer ID: ${customer._id}, Address ID: ${customer.address}`);
 });
 
 
-  
+  const startIndex=skip+1
+  console.log('startInddex',startIndex)
      
     // Fetch all users
     console.log('my new customer',customers)
-    res.render('admin/adminCustomer',{customers}) 
+    res.render('admin/adminCustomer',{customers,currentPage: page,
+      totalPages: totalPages,startIndex }) 
   } catch (error) {
    console.log(error.message) 
   }

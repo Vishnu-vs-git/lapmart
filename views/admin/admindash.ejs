@@ -87,13 +87,13 @@
 
                 <!-- Best-Selling Categories Chart -->
                 <div class="mt-8">
-                    <h2 class="text-xl font-bold mb-4 hover:text-black hover:font-bold">Top Best-Selling Categories - Graphical Representation</h2>
+                    <h2 class="text-xl font-bold mb-4 hover:text-blue-400 hover:font-bold">Top Best-Selling Categories - Graphical Representation</h2>
                     <canvas id="categoryChart" class="bg-white p-6 rounded-lg shadow-md w-full sm:w-1/2 mx-auto"></canvas>
                 </div>
 
                 <!-- Top-Selling Products Chart -->
                 <div class="mt-8">
-                    <h2 class="text-xl font-bold mb-4 hover:text-black hover:font-bold">Top Best-Selling Products - Graphical Representation</h2>
+                    <h2 class="text-xl font-bold mb-4 hover:text-blue-400 hover:font-bold">Top Best-Selling Products - Graphical Representation</h2>
                     <!-- Increase the width to take full space -->
                     <canvas id="productChart" class="bg-white p-6 rounded-lg shadow-md w-full sm:w-full md:w-3/4 lg:w-2/3 mx-auto"></canvas>
                 </div>
@@ -123,7 +123,7 @@
                 productsTable.innerHTML = '';
                 bestSellingProducts.forEach(product => {
                     const row = `
-                        <tr class="border-b hover:bg-gray-100">
+                        <tr class="border-b ">
                             <td class="p-4">${product.name}</td>
                             <td class="p-4">${product.totalSold}</td>
                             <td class="p-4">₹${product.totalRevenue}</td>

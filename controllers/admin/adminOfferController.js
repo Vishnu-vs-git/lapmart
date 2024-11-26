@@ -7,10 +7,19 @@ const Product=require('../../model/productSchema');
 exports.getOffers = async (req, res) => {
   try {
     const message=req.session.message||"";
+
     delete req.session.message;
+    const page= parseInt(req.query.page);
+    const limit=8;
+    const skip=(page-1)*limit;
+    const totalOffers= await Offer.countDocuments();
+    const totalPages=Math.ceil(totalOffers/limit);
     const categories = await Category.find(); 
-    const offers = await Offer.find().populate('category'); 
-    res.render('admin/adminOffer', { categories, offers,message });
+    const offers = await Offer.find().populate('category').skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 }); 
+    res.render('admin/adminOffer', { categories, offers,message,currentPage: page,
+      totalPages: totalPages });
   } catch (error) {
     console.error('Error fetching offers:', error);
     res.status(500).send('Internal Server Error');

@@ -8,37 +8,37 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
-<body>
-  <div class="flex">
+<body class="bg-black">
+  <div class="flex bg-black  ">
     <!-- Admin Sidebar -->
     <%- include('../partials/adminSidebar') %>
 
     <!-- Main Content -->
     <div class="flex-1">
       <!-- Top Bar with Admin Icon -->
-      <header class="flex justify-end bg-white shadow p-4">
+      <header class="flex justify-end bg-black shadow p-4">
         <%- include('../partials/adminLoginIcon') %>
       </header>
 
       <!-- Sales Report Content -->
-      <div class="p-6 bg-gray-100 min-h-screen">
+      <div class="p-6 min-h-screen">
         <!-- Header -->
-        <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
+        <h1 class="text-2xl text-white mb-4">Sales Report</h1>
 
         <!-- Filter Section -->
-        <form id="filterForm" action="/admin/salesReport" method="GET" class="bg-white p-4 shadow rounded-md mb-6">
-            <div class="flex flex-wrap gap-4">
-                <div class="flex flex-col">
+        <form id="filterForm" action="/admin/salesReport" method="GET" class="bg-black  text-white p-4 shadow rounded-md mb-6">
+            <div class="flex flex-wrap gap-4 ">
+                <div class="flex flex-col ">
                     <label for="startDate" class="text-sm font-semibold">Start Date</label>
-                    <input type="date" name="startDate" id="startDate" class="border p-2 rounded-md" required>
+                    <input type="date" name="startDate" id="startDate" class="border p-2 text-black rounded-md" required>
                 </div>
                 <div class="flex flex-col">
                     <label for="endDate" class="text-sm font-semibold">End Date</label>
-                    <input type="date" name="endDate" id="endDate" class="border p-2 rounded-md" required>
+                    <input type="date" name="endDate" id="endDate" class="border p-2 text-black rounded-md" required>
                 </div>
                 <div class="flex flex-col">
                     <label for="filter" class="text-sm font-semibold">Quick Filter</label>
-                    <select name="filter" id="filter" class="border p-2 rounded-md">
+                    <select name="filter" id="filter" class="border p-2 text-black rounded-md">
                         <option value="">Custom</option>
                         <option value="day">Last 1 Day</option>
                         <option value="week">Last Week</option>

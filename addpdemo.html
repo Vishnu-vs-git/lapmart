@@ -1,137 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Category-based Offers</title>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.0/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-</head>
-<body>
-  <div class="flex">
-    <!-- Admin Sidebar -->
-    <%- include('../partials/adminSidebar') %>
-
-    <!-- Main Content -->
-    <div class="flex-1">
-      <!-- Top Bar with Admin Icon -->
-      <header class="flex justify-end bg-white shadow p-4">
-        <%- include('../partials/adminLoginIcon') %>
-      </header>
-
-      <!-- Sales Report Content -->
-      <div class="p-6 bg-gray-100 min-h-screen">
-        <!-- Header -->
-        <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
-
-        <!-- Filter Section -->
-        <form id="filterForm" action="/admin/sales-report" method="GET" class="bg-white p-4 shadow rounded-md mb-6">
-            <div class="flex flex-wrap gap-4">
-                <div class="flex flex-col">
-                    <label for="startDate" class="text-sm font-semibold">Start Date</label>
-                    <input type="date" name="startDate" id="startDate" class="border p-2 rounded-md" required>
-                </div>
-                <div class="flex flex-col">
-                    <label for="endDate" class="text-sm font-semibold">End Date</label>
-                    <input type="date" name="endDate" id="endDate" class="border p-2 rounded-md" required>
-                </div>
-                <div class="flex flex-col">
-                    <label for="filter" class="text-sm font-semibold">Quick Filter</label>
-                    <select name="filter" id="filter" class="border p-2 rounded-md">
-                        <option value="">Custom</option>
-                        <option value="day">Last 1 Day</option>
-                        <option value="week">Last Week</option>
-                        <option value="month">Last Month</option>
-                    </select>
-                </div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md mt-6">
-                    Apply Filters
-                </button>
-            </div>
-        </form>
-
-        <!-- Report Summary -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white shadow rounded-md p-4">
-                <h2 class="text-lg font-semibold">Total Orders</h2>
-                <p class="text-2xl font-bold"><%= totalOrders %></p>
-            </div>
-            <div class="bg-white shadow rounded-md p-4">
-                <h2 class="text-lg font-semibold">Total Sales Amount</h2>
-                <p class="text-2xl font-bold">$<%= totalSalesAmount.toFixed(2) %></p>
-            </div>
-            <div class="bg-white shadow rounded-md p-4">
-                <h2 class="text-lg font-semibold">Total Discount</h2>
-                <p class="text-2xl font-bold">$<%= totalDiscount.toFixed(2) %></p>
-            </div>
-        </div>
-
-        <!-- Sales Data Table -->
-        <div class="bg-white shadow rounded-md p-4">
-            <h2 class="text-lg font-semibold mb-4">Order Details</h2>
-            <table class="w-full table-auto border-collapse">
-                <thead>
-                    <tr class="bg-gray-200 text-left">
-                        <th class="p-2 border">Order ID</th>
-                        <th class="p-2 border">Date</th>
-                        <th class="p-2 border">Total Amount</th>
-                        <th class="p-2 border">Discount</th>
-                        <th class="p-2 border">Final Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% orders.forEach(order => { %>
-                        <tr class="hover:bg-gray-100">
-                            <td class="p-2 border"><%= order._id %></td>
-                            <td class="p-2 border"><%= new Date(order.orderDate).toLocaleDateString() %></td>
-                            <td class="p-2 border">$<%= order.totalAmount.toFixed(2) %></td>
-                            <td class="p-2 border">$<%= (order.discountAmount + order.couponDiscount).toFixed(2) %></td>
-                            <td class="p-2 border">$<%= order.finalAmount.toFixed(2) %></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Download Options -->
-        <div class="mt-6 flex space-x-4">
-            <a href="/admin/sales-report/pdf?startDate=<%= startDate %>&endDate=<%= endDate %>" class="bg-red-500 text-white px-4 py-2 rounded-md">
-                Download PDF
-            </a>
-            <a href="/admin/sales-report/excel?startDate=<%= startDate %>&endDate=<%= endDate %>" class="bg-green-500 text-white px-4 py-2 rounded-md">
-                Download Excel
-            </a>
-        </div>
-    </div>
-  </div>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    // JavaScript function to toggle offer status
-    async function toggleOfferStatus(offerId) {
-      try {
-        const response = await axios.patch(`/offers/toggleStatus/${offerId}`);
-        
-        if (response.data.success) {
-          // Update the status and button label dynamically
-          const statusElem = document.getElementById(`status-${offerId}`);
-          const buttonElem = document.getElementById(`btn-${offerId}`);
-          
-          if (response.data.isActive) {
-            statusElem.innerText = 'Active';
-            buttonElem.innerText = 'Block';
-          } else {
-            statusElem.innerText = 'Inactive';
-            buttonElem.innerText = 'Unblock';
-          }
-        } else {
-          alert('Failed to toggle offer status.');
-        }
-      } catch (error) {
-        console.error("Error toggling offer status:", error);
-        alert('An error occurred. Please try again.');
-      }
-    }
-  </script>
-</body>
-</html>
+ <!-- Pagination -->
+ <div class="flex justify-center mt-4 space-x-2">
+  <% if (currentPage > 1) { %>
+    <a href="/uwallet?page=<%= currentPage - 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Previous</a>
+  <% } %>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="/wallet?page=<%= i %>" class="px-4 py-2 rounded <%= i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black hover:bg-gray-400' %>"><%= i %></a>
+  <% } %>
+  <% if (currentPage < totalPages) { %>
+    <a href="/wallet?page=<%= currentPage + 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Next</a>
+  <% } %>
+</div>
+<% } else { %>
+<p class="text-gray-500 text-center">No transactions found.</p>
+<% } %>

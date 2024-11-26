@@ -25,13 +25,27 @@ cloudinary.config({
 //....Listing of products...//
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
-    const categories = await Category.find();
+
+    const page = parseInt(req.query.page) || 1; // Current page number
+    const limit = 8; 
+    const skip = (page - 1) * limit;
+
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / limit);
+
+   
+    const products = await Product.find()
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+    const categories = await Category.find()
     const message = req.session.message || null;
-    req.session.message = null; // Clear message after using it
+    req.session.message = null; 
+   const startIndex=skip+1
 
     
-    res.render('admin/adminProducts', { message: null, messageType: null, products, categories });
+    res.render('admin/adminProducts', { message: null, messageType: null, products, categories,currentPage: page,
+      totalPages: totalPages,startIndex });
   } catch (error) {
     console.log(error);
     res.render('admin/adminProducts', { message: 'An error occurred. Please try again.', messageType: 'error', products: [],categories:[] });

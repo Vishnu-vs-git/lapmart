@@ -38,7 +38,7 @@
                 <tbody>
                     <% customers.forEach((customer,index) => { %>
                     <tr class="bg-gray-700 border-b border-gray-600">
-                        <td class="py-3 px-6"><%= index+1 %></td>
+                        <td class="py-3 px-6"><%= index + 1%></td>
                         <td class="py-3 px-6"><%= customer.userName %></td>
                         <td class="py-3 px-6"><%= customer.email %></td>
                         <td class="py-3 px-6"><%= customer.phone %></td>
@@ -61,7 +61,20 @@
                 </tbody>
             </table>
 
-            <%- include('../partials/adminPagination') %>
+                    <!-- Pagination -->
+ <div class="flex justify-center mt-4 space-x-2">
+    <% if (currentPage > 1) { %>
+      <a href="/admin/customers?page=<%= currentPage - 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Previous</a>
+    <% } %>
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <a href="/admin/customers?page=<%= i %>" class="px-4 py-2 rounded <%= i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black hover:bg-gray-400' %>"><%= i %></a>
+    <% } %>
+    <% if (currentPage < totalPages) { %>
+      <a href="/admin/customers?page=<%= currentPage + 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Next</a>
+    <% } %>
+
+           
+        </div>
         </div>
     </div>
 

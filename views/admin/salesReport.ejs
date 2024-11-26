@@ -92,7 +92,7 @@
                             <td class="p-2 border">₹<%= order.totalAmount.toFixed(2) %></td>
                        
                             <td class="p-2 border">₹<%= order.couponDiscount.toFixed(2) %></td>
-                            <td class="p-2 border"><%= order.isPaid===true?"Completed":'pending' %></td>
+                            <td class="p-2 border"><%= order.isPaid===true?"Completed":'Completed' %></td>
                             <td class="p-2 border">₹<%= order.totalDiscount.toFixed(2) %></td>
                             <td class="p-2 border"><%= order.paymentMethod %></td>
                         </tr>

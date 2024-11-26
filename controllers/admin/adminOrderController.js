@@ -79,7 +79,7 @@ exports.getOrderDetails=async(req,res)=>{
       return res.status(404).send('Order details not found');
     }
     
-    res.render('admin/adminOrderdetails',{order})
+    res.render('admin/adminOrderDetails',{order})
 
   }catch(error){
       console.error('Something  error happened ',error)

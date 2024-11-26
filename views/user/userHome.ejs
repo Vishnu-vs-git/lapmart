@@ -316,36 +316,59 @@
     
     <script>
         function addToWishlist(productId) {
-            axios.post('/user/addWishlist', { productId: productId })
-                .then(response => {
-                    if (response.data.success) {
-                        // alert('Added to wishlist!');
-                        Swal.fire({
-      title: 'Success!',
-      text: 'Prodct  has been Added to wishlist! successfully.',
-      icon: 'success', // You can also use 'info', 'error', 'warning', etc.
-      iconColor: '#4CAF50', // Custom icon color
-      showConfirmButton: false,
-      confirmButtonText: false,
-      timer :3000,
-      confirmButtonColor: '#4CAF50', // Button color
-      customClass: {
-        popup: 'rounded-alert', // Custom class to style the popup
-        icon: 'custom-icon',    // Custom class to style the icon
-        title: 'custom-title',  // Custom class to style the title
-        confirmButton: 'custom-button' // Custom class for button styling
-      }
-    });
-    
-                    } else {
-                        alert('Could not add to wishlist.');
+                        axios.post('/user/addWishlist', { productId: productId })
+                            .then(response => {
+                                // Check for success or already added condition
+                                console.log("Response data:", response.data);
+                                if (response.data.success) {
+                                    Swal.fire({
+                                        title: 'Success!',
+                                        text: response.data.message || 'Product has been added to wishlist successfully.',
+                                        icon: 'success',
+                                        iconColor: '#4CAF50',
+                                        timer: 3000,
+                                        showConfirmButton: false,
+                                        customClass: {
+                                            popup: 'rounded-alert',
+                                            icon: 'custom-icon',
+                                            title: 'custom-title',
+                                            confirmButton: 'custom-button'
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Warning!',
+                                        text: response.data.message || 'Product is already in wishlist!',
+                                        icon: 'warning',
+                                        iconColor: '#FF9800',
+                                        timer: 3000,
+                                        showConfirmButton: false,
+                                        customClass: {
+                                            popup: 'rounded-alert',
+                                            icon: 'custom-icon',
+                                            title: 'custom-title',
+                                            confirmButton: 'custom-button'
+                                        }
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error adding to wishlist:', error);
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'An error occurred. Please try again.',
+                                    icon: 'error',
+                                    iconColor: '#F44336',
+                                    timer: 3000,
+                                    showConfirmButton: false
+                                });
+                            });
                     }
-                })
-                .catch(error => {
-                    console.error('Error adding to wishlist:', error);
-                    alert('An error occurred. Please try again.');
-                });
-        }
+
+                    document.getElementById('filterByCategory').addEventListener('change', function(event){
+                        const  selectedCategory = event.target.value;
+                        window.location.href = `/user/products?search=${search}&category=${selectedCategory}`
+                    });
     </script>
     
 </body>

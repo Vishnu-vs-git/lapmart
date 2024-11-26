@@ -8,6 +8,7 @@ const Wallet=require('../../model/walletSchema')
 const Coupon=require('../../model/couponSchema')
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
+const PDFDocument=require('pdfkit');
 const razorpayInstance = new Razorpay({
   key_id: process.env.YOUR_RAZORPAY_KEY_ID,
   key_secret: process.env.YOUR_RAZORPAY_SECRET_KEY,
@@ -572,6 +573,125 @@ exports.retryPayment = async (req, res) => {
 };
 
 
-///----------------------->function to calculate tax
+exports.downloadInvoice = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findOne({ orderId }).populate('items.productId');
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
 
+    const doc = new PDFDocument();
 
+    // Set headers for file download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=Invoice-${orderId}.pdf`
+    );
+
+    doc.pipe(res);
+
+    // Header Section
+    doc
+      .fontSize(20)
+      .text('LapMart', 160, 50)
+      .fontSize(10)
+      .text('Digital LapMart Store', 160, 70)
+      .moveDown();
+
+    // Invoice Title
+    doc
+      .fontSize(20)
+      .text('INVOICE', { align: 'center' })
+      .moveDown();
+
+    // Invoice Details
+    doc
+      .fontSize(12)
+      .text(`Order ID: ${order.orderId}`)
+      .text(`User ID: ${order.userId}`)
+      .text(`Payment Method: ${order.paymentMethod}`)
+      .text(`Date: ${order.createdAt.toDateString()}`)
+      .moveDown();
+
+    // Shipping Address
+    const address = order.shippingAddress;
+    doc
+      .fontSize(14)
+      .text('Shipping Address:')
+      .fontSize(12)
+      .text(`${address.addressLine1}`);
+    if (address.addressLine2) {
+      doc.text(`${address.addressLine2}`);
+    }
+    doc
+      .text(`${address.street}`)
+      .text(`${address.city}, ${address.state} - ${address.zipCode}`)
+      .text(`${address.country}`)
+      .text(`Phone: ${address.phoneNo}`)
+      .moveDown();
+
+    // Table Header
+    doc
+      .fontSize(14)
+      .text('Order Items:')
+      .moveDown()
+      .fontSize(12);
+
+    const tableTop = doc.y; // Starting position for the table
+    const itemWidth = 200; // Width for product name
+    const quantityWidth = 70; // Width for quantity
+    const priceWidth = 80; // Width for price
+    const totalWidth = 100; // Width for total
+    const rowHeight = 20; // Height for each row
+
+    // Draw table headers
+    doc
+      .fontSize(12)
+      .text('Product Name', 50, tableTop)
+      .text('Quantity', 50 + itemWidth, tableTop)
+      .text('Price (\u20B9)', 50 + itemWidth + quantityWidth, tableTop)
+      .text('Total (\u20B9)', 50 + itemWidth + quantityWidth + priceWidth, tableTop);
+
+    // Add a line below headers
+    doc
+      .moveTo(50, tableTop + 15)
+      .lineTo(50 + itemWidth + quantityWidth + priceWidth + totalWidth, tableTop + 15)
+      .stroke();
+
+    // Add Order Items
+    let currentY = tableTop + 25;
+    order.items.forEach((item) => {
+      doc
+        .fontSize(10)
+        .text(item.productId.name, 50, currentY, { width: itemWidth, ellipsis: true })
+        .text(item.quantity.toString(), 50 + itemWidth, currentY, { width: quantityWidth, align: 'center' })
+        .text(`\u20B9${item.price.toFixed(2)}`, 50 + itemWidth + quantityWidth, currentY, { width: priceWidth, align: 'right' })
+        .text(`\u20B9${item.itemTotal.toFixed(2)}`, 50 + itemWidth + quantityWidth + priceWidth, currentY, { width: totalWidth, align: 'right' });
+
+      currentY += rowHeight; // Adjust row spacing
+    });
+
+    // Add Totals
+    currentY += 10; // Add some space after the last item
+    doc
+      .fontSize(10)
+      .text(`Subtotal: \u20B9${order.subTotal.toFixed(2)}`, 50 + itemWidth + quantityWidth + priceWidth, currentY, { width: totalWidth, align: 'right' })
+      .text(`Tax: \u20B9${order.tax ? order.tax.toFixed(2) : '0.00'}`, 50 + itemWidth + quantityWidth + priceWidth, currentY + 20, { width: totalWidth, align: 'right' })
+      .text(`Discount: \u20B9${order.totalDiscount ? order.totalDiscount.toFixed(2) : '0.00'}`, 50 + itemWidth + quantityWidth + priceWidth, currentY + 40, { width: totalWidth, align: 'right' })
+      .text(`Total Amount: \u20B9${order.totalAmount.toFixed(2)}`, 50 + itemWidth + quantityWidth + priceWidth, currentY + 60, { width: totalWidth, align: 'right' });
+
+    // Footer
+    doc
+      .moveDown()
+      .text('Thank you for shopping with LapMart!', { align: 'center' })
+      .text('For any queries, please contact support@lapmart.com', { align: 'center' });
+
+    // Finalize PDF
+    doc.end();
+  } catch (error) {
+    console.error('Error generating invoice:', error);
+    res.status(500).json({ error: 'Failed to generate invoice' });
+  }
+};

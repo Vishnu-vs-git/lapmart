@@ -94,6 +94,7 @@ router.post('/placeOrder',isUser,orderController.confirmOrder)
  router.get('/orderdetails/:id',isUser,orderController.getOrderdetails)
  router.post('/cancelOrder',isUser,orderController.cancelOrder);
  router.post('/returnOrder',isUser,orderController.returnOrder);
+ router.get('/downloadInvoice/:orderId',isUser,orderController.downloadInvoice)
 
 
  router.post('/createRpayOrder',isUser,checkoutController.createRazorPayOrder)

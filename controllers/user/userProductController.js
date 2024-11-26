@@ -109,3 +109,10 @@ exports.productList = async (req, res) => {
     res.status(500).send("server error");
   }
 };
+
+// exports.getProductdetails=async(req,res)=>{
+//   try{
+//     const{category}=req.params;
+
+//   }
+// }

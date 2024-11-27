@@ -67,11 +67,14 @@
                             <p class="text-gray-600 mb-4">Coupon Discount: <strong>₹<%= (order.couponDiscount ? order.couponDiscount : 0).toFixed(2) %></strong></p>
                             <p class="text-gray-600 mb-4">Discount: <strong>₹<%= (Number(order.totalDiscount) || 0).toFixed(2) %></strong></p>
                         <!-- New Download Invoice button -->
+                        <% if (order.
+                        isPaid=== true > 0) { %>
                         <button 
                         class="download-invoice-btn inline-block mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                         data-order-id="<%= order.orderId %>">
                         Download Invoice
                     </button>
+                    <% } %>
                             <!-- Razorpay Failed Payment Message and Pay Again Button -->
                             <% if (order.paymentMethod === 'Razorpay' && order.isPaid === false) { %>
                                 <div class="bg-red-100 text-red-700 p-2 rounded-lg mt-2">

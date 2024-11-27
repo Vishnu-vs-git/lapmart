@@ -360,8 +360,8 @@
           showError("couponCode", "Coupon code cannot exceed 15 characters.");
           formIsValid = false;
         }
-        if (newformData.couponValue > 10000) {
-  showError("discountValue", "Coupon value cannot exceed 10,000.");
+        if (newformData.couponValue > 2000) {
+  showError("discountValue", "Coupon value cannot exceed 2000.");
   formIsValid = false;
 }
 if (newformData.totalUsageLimit > 5) {
@@ -370,8 +370,8 @@ if (newformData.totalUsageLimit > 5) {
   }
   if (newformData.couponType === "percentage") {
   // Validate Coupon Value for Percentage Coupon Type
-  if (newformData.couponValue <= 0 || newformData.couponValue > 100) {
-    showError("discountValue", "Coupon value for percentage type must be between 1 and 100.");
+  if (newformData.couponValue <= 0 || newformData.couponValue >50) {
+    showError("discountValue", "Coupon value for percentage type must be between 1 and 50.");
     formIsValid = false;
   }
 }

@@ -354,14 +354,29 @@
                             })
                             .catch(error => {
                                 console.error('Error adding to wishlist:', error);
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: 'An error occurred. Please try again.',
-                                    icon: 'error',
-                                    iconColor: '#F44336',
-                                    timer: 3000,
-                                    showConfirmButton: false
-                                });
+                                if (error.response && error.response.status === 401) {
+                                    Swal.fire({
+                                        title: 'Please Login!',
+                                        text: 'You need to login to add items to your wishlist.',
+                                        icon: 'info',
+                                        showCancelButton: true,
+                                        confirmButtonText: 'Login',
+                                        cancelButtonText: 'Cancel'
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            window.location.href = '/user/login';
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'An error occurred. Please try again.',
+                                        icon: 'error',
+                                        iconColor: '#F44336',
+                                        timer: 3000,
+                                        showConfirmButton: false
+                                    });
+                                }
                             });
                     }
 

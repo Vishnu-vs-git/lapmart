@@ -172,6 +172,7 @@ const verifyOtp = async (req, res) => {
         await wallet.save();
 
         req.session.user_id = userData._id;
+        req.flash("success", "OTP verified successfully. Please login.");
         res.redirect("/user/login");
       } else {
         res.render("user/userSignup", {
@@ -254,34 +255,72 @@ const loadLogin = async (req, res) => {
 const userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    req.session.user_id = user._id;
-  
-    if (!user) {
-      return res.render("user/userSignup", {
-        message: "Email doesn't exist require signUp",
+
+    // 1️⃣ Basic input validation
+    if (!email || !password) {
+      return res.render("user/userLogin", {
+        message: "Email and password are required",
       });
     }
-    if(user.isBlocked===true){
-      return res.render('user/userSignup',{
-        message:'Your account is blocked'
-      })
-    }
-    //----veryfying password---//
 
+    // 2️⃣ Password format validation (same as signup)
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return res.render("user/userLogin", {
+        message:
+          "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.",
+      });
+    }
+
+    // 3️⃣ Find user
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.render("user/userLogin", {
+        message: "User not found.Please signup",
+      });
+    }
+
+    // 4️⃣ Blocked user
+    if (user.isBlocked) {
+      return res.render("user/userLogin", {
+        message: "Your account is blocked",
+      });
+    }
+
+    // 5️⃣ Google-only user
+    if (!user.password) {
+      return res.render("user/userLogin", {
+        message: "This account was created using Google. Please login with Google.",
+      });
+    }
+
+    // 6️⃣ Compare password
     const isValidPassword = await bcrypt.compare(password, user.password);
+
     if (!isValidPassword) {
       return res.render("user/userLogin", {
-        message: "invalid email or password",
+        message: "Invalid  password",
       });
     }
+
+    // 7️⃣ Session
+    req.session.user_id = user._id;
     req.session.user = user;
-    req.session.user.IsBlocked = user.isBlocked;
-    req.session.message={type:'success',text:'user Logged in successfully'}
+    req.session.message = {
+      type: "success",
+      text: "User logged in successfully",
+    };
+
     return res.redirect("/user/home");
+
   } catch (error) {
-    console.error(error); // Logs the actual error
-    return res.status(500).json({ message: "Server error" }); // Clean error message for the response
+    console.error(error);
+    return res.render("user/userLogin", {
+      message: "Something went wrong. Please try again.",
+    });
   }
 };
 

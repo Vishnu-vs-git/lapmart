@@ -1,0 +1,31 @@
+<% if (success.length > 0) { %>
+  <div id="flash-success" data-message="<%= success[0] %>"></div>
+<% } %>
+
+<% if (error.length > 0) { %>
+  <div id="flash-error" data-message="<%= error[0] %>"></div>
+<% } %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  const successDiv = document.getElementById("flash-success");
+  const errorDiv = document.getElementById("flash-error");
+
+  if (successDiv) {
+    Swal.fire({
+      icon: "success",
+      title: "Success",
+      text: successDiv.dataset.message,
+      timer: 2500,
+      showConfirmButton: false,
+    });
+  }
+
+  if (errorDiv) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: errorDiv.dataset.message,
+    });
+  }
+</script>

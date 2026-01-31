@@ -1,6 +1,7 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const User = require("./model/userSchema"); // Assuming User schema is already defined
+const User = require("./model/userSchema"); 
+const Wallet = require("./model/walletSchema")
 require("dotenv").config();
 
 passport.use(
@@ -13,17 +14,10 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
       
-        // // let user = await User.findOne({ googleId: profile.id });
+       
          let user = await User.findOne({ email:profile.emails[0].value });
 
-        // if (!user) {
-        //   user = await User.create({
-        //     googleId: profile.id,
-        //     userName: profile.displayName,
-        //     email: profile.emails[0].value,
-        //   });
-        // }
-        // done(null, user);
+        
         if (user) {
           // Update the existing user with the Google ID if not already linked
           if (!user.googleId) {
@@ -39,6 +33,15 @@ passport.use(
                 email: profile.emails[0].value,
           
         })
+
+         const existingWallet = await Wallet.findOne({ userId: user._id });
+           if (!existingWallet) {
+          await Wallet.create({
+            userId: user._id,
+            balance: 0,
+          });
+        }
+
         done(null, user);
 
         console.log("New user created:", user);

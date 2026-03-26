@@ -61,7 +61,12 @@ app.use(passport.session());
 // Import the authentication routes
 const authRoutes = require("./routes/user/user");
 app.get("/", (req, res) => {
-  res.render("user/landingPage");
+  res.render("user/landingPage", {
+    banner: { titleImages: "/images/default.jpg" },
+    banners: { titleImages: "/images/default.jpg" },
+    blockbusterDeals: [],
+    newArrivals: []
+  });
 });
 app.use(authRoutes);
 
@@ -73,7 +78,7 @@ app.use("*", (req, res) => {
   res.render("user/servererror");
 });
 
-const port = process.env.PORT ;
+const port = process.env.PORT || 3000;
   
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

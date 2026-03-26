@@ -41,7 +41,7 @@ app.use(
     secret: "34547fgfhh55r",
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 60000 * 30 }, // example: 30 minutes
+    cookie: { maxAge: 60000 * 30 }, 
   })
 );
 
@@ -57,16 +57,20 @@ app.use(passport.session());
 
 // Import the authentication routes
 const authRoutes = require("./routes/user/user");
+app.get("/", (req, res) => {
+  res.render("user/landingPage");
+});
 app.use(authRoutes);
 
 app.use(userRouter);
 app.use("/admin", adminRouter);
-app.use("/user", userRouter);               
+app.use("/user", userRouter);  
+             
 app.use("*", (req, res) => {
   res.render("user/servererror");
 });
 
-const port = 7010;
+const port = process.env.PORT ;
   
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

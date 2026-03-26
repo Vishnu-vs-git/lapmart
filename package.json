@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon"
+    "start": "node app.js",
+    "run" : "nodemon"
   },
   "author": "", 
   "license": "ISC",

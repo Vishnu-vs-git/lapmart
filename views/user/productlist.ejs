@@ -108,7 +108,12 @@
                         <% for (let i = 0; i < 5; i++) { %>
                             <i class="fas fa-star <%= i < Math.round(product.rating) ? 'text-yellow-500' : 'text-gray-400' %> ml-1"></i>
                         <% } %>
-                        <p class="text-sm text-gray-800 ml-2"><%= product.rating %> (1 review)</p>
+                       <p class="text-sm text-gray-800 ml-2">
+  <%= averageRating.toFixed(1) %> 
+(<%= totalReviews %> reviews)
+
+</p>
+
                     </div>
                 
                     <div class="mt-8">
@@ -187,33 +192,71 @@
             <!-- Review System -->
             <div class="mt-16 shadow-lg p-6">
                 <h3 class="text-xl font-bold text-gray-800">Reviews</h3>
-                <div class="mt-4">
-                    <div class="flex items-center">
-                        <p class="text-sm text-gray-800 font-bold">4.0</p>
-                        <i class="fas fa-star text-yellow-500 ml-1"></i>
-                        <p class="text-sm text-gray-800 font-bold ml-3">1 review</p>
-                    </div>
-                    <p class="text-sm mt-4 text-gray-800">"Okay that all I can say about this product."</p>
-                </div>
+               <div class="mt-6 space-y-4">
+  <% if (reviews.length === 0) { %>
+    <p class="text-gray-500">No reviews yet. Be the first!</p>
+  <% } %>
+
+  <% reviews.forEach(review => { %>
+    <div class="border p-4 rounded bg-gray-50">
+      <div class="flex items-center justify-between">
+        <p class="font-semibold text-gray-800">
+          <%= review.userId.userName %>
+        </p>
+        <span class="text-sm text-gray-500">
+          <%= review.createdAt.toDateString() %>
+        </span>
+      </div>
+
+      <div class="flex items-center mt-1">
+        <% for(let i = 1; i <= 5; i++) { %>
+        <i class="fas fa-star <%= i < Math.round(averageRating) ? 'text-yellow-500' : 'text-gray-400' %> ml-1"></i>
+
+        <% } %>
+      </div>
+
+      <p class="mt-2 text-gray-700">
+        <%= review.comment %>
+      </p>
+    </div>
+  <% }) %>
+</div>
 
                 <!-- Review Form -->
+                 <% if (user) { %>
                 <h4 class="mt-6 text-lg font-bold text-gray-800">Submit a Review:</h4>
-                <form class="mt-4">
-                    <textarea class="border rounded w-full p-2" rows="4" placeholder="Your Review"></textarea>
-                    <div class="flex justify-between items-center mt-4">
-                        <div class="flex items-center">
-                            <span class="text-sm text-gray-700">Rate:</span>
-                            <select class="ml-2 border rounded p-2">
-                                <option value="5">5 Stars</option>
-                                <option value="4">4 Stars</option>
-                                <option value="3">3 Stars</option>
-                                <option value="2">2 Stars</option>
-                                <option value="1">1 Star</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Submit</button>
-                    </div>
-                </form>
+               <form id="reviewForm" class="mt-4">
+  <input type="hidden" id="productId" value="<%= product._id %>">
+
+  <textarea id="comment"
+    class="border rounded w-full p-2"
+    rows="4"
+    placeholder="Write your review..."
+    required></textarea>
+
+  <div class="flex justify-between items-center mt-4">
+    <div class="flex items-center">
+      <span class="text-sm text-gray-700 mr-2">Rate:</span>
+      <select id="rating" class="border rounded p-2">
+        <option value="5">⭐⭐⭐⭐⭐</option>
+        <option value="4">⭐⭐⭐⭐</option>
+        <option value="3">⭐⭐⭐</option>
+        <option value="2">⭐⭐</option>
+        <option value="1">⭐</option>
+      </select>
+    </div>
+
+    <button type="submit"
+      class="px-4 py-2 bg-blue-600 text-white rounded">
+      Submit
+    </button>
+  </div>
+</form>
+ <% } else { %>
+  <p class="text-gray-500">
+    Please <a href="/user/login" class="text-blue-600 underline">login</a> to submit a review.
+  </p>
+<% } %>
             </div>
         </div>
     </div>
@@ -280,6 +323,48 @@
     btn.style.backgroundColor = btn.dataset.color;
   });
 </script>
+<script>
+document.getElementById("reviewForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const data = {
+    productId: document.getElementById("productId").value,
+    rating: document.getElementById("rating").value,
+    comment: document.getElementById("comment").value
+  };
+    console.log("data is",data)
+  try {
+    const res = await fetch("/user/add-review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: "success",
+        text: "Review added successfully",
+        timer: 2000,
+        showConfirmButton: false
+      }).then(() => location.reload());
+    } else {
+      Swal.fire({
+        icon: "warning",
+        text: result.message
+      });
+    }
+
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      text: "Something went wrong"
+    });
+  }
+});
+</script>
+
 
     <script>
         $(document).ready(function () {

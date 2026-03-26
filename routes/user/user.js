@@ -14,6 +14,7 @@ const wishlistController=require('../../controllers/user/wishlistController');
 const checkStockAvailability=require('../../middleware/checkStock')
   const { blockUser } = require('../../middleware/BlockUser'); 
 const checkUser= require('../../middleware/checkuser')
+const reviewController = require("../../controllers/user/reviewController");
 
 router.use(checkUser.checkuser)
 
@@ -104,7 +105,8 @@ router.post('/placeOrder',isUser,orderController.confirmOrder)
  router.get('/wallet',isUser,walletController.getwallet)
  router.post('/applyCoupon',isUser,couponController.applyCoupon);
  router.get('/coupons',isUser,couponController.getCoupon);
-
+// ----------> review 
+router.post("/add-review",isUser,reviewController.addReview)
 
  ///--------->wishlist controllers
 router.post('/addWishlist',wishlistController.addToWishlist);

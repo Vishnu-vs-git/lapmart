@@ -113,7 +113,15 @@ const productSchema=mongoose.Schema({
     },
     finalPrice: { 
       type: Number
-    } 
+    }, 
+    averageRating :{
+      type : Number,
+      default : 0
+    },
+    totalReviews:{
+      type: Number,
+      default : 0
+    }
 
  
 },{timestamps:true})

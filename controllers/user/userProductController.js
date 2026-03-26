@@ -1,5 +1,6 @@
 const Product = require("../../model/productSchema");
 const Category = require("../../model/categorySchema");
+const Review = require("../../model/reviewSchema");
 
 
 //.....> listing all products
@@ -91,24 +92,53 @@ exports.allproducts = async (req, res) => {
 exports.productList = async (req, res) => {
   try {
     const productId = req.params.id;
+
+    // 1️⃣ Fetch product
     const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).send("Product not found");
+    }
+
     const breadcrumbs = [
       { name: "Home", url: "/" },
       { name: "All Products", url: "/user/products" },
       { name: product.name, url: "#" },
     ];
 
-    //--------> feting product details
+    // 2️⃣ Fetch related products
     const relatedProducts = await Product.find({
       category: product.category,
       _id: { $ne: productId },
     }).limit(4);
-    res.render("user/productlist", { product, relatedProducts, breadcrumbs });
+
+    // 3️⃣ Fetch reviews
+    const reviews = await Review.find({ productId })
+      .populate("userId", "userName")
+      .sort({ createdAt: -1 });
+
+    // 4️⃣ Calculate rating
+    let averageRating = 0;
+    if (reviews.length > 0) {
+      const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+      averageRating = totalRating / reviews.length;
+    }
+
+    // 5️⃣ Send everything to view
+    res.render("user/productlist", {
+      product,
+      relatedProducts,
+      breadcrumbs,
+      reviews,
+      averageRating,
+      totalReviews: reviews.length,
+    });
+
   } catch (error) {
-    console.error("error in fetching product category", error);
-    res.status(500).send("server error");
+    console.error("Error fetching product details:", error);
+    res.status(500).send("Server error");
   }
 };
+
 
 // exports.getProductdetails=async(req,res)=>{
 //   try{

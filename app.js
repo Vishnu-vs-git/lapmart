@@ -60,14 +60,7 @@ app.use(passport.session());
 
 // Import the authentication routes
 const authRoutes = require("./routes/user/user");
-app.get("/", (req, res) => {
-  res.render("user/landingPage", {
-    banner: { titleImages: "/images/default.jpg" },
-    banners: { titleImages: "/images/default.jpg" },
-    blockbusterDeals: [],
-    newArrivals: []
-  });
-});
+app.use("/", userRouter); 
 app.use(authRoutes);
 
 app.use(userRouter);

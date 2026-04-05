@@ -1,6 +1,8 @@
 const Product=require('../../model/productSchema');
 const User=require('../../model/userSchema');
 const Order=require('../../model/orderSchema');
+const STATUS_CODES = require('../../constants/statusCodes');
+const messages = require('../../constants/messages');
 
 
 
@@ -13,18 +15,18 @@ exports.renderDashboardPage = (req, res) => {
   try {
       res.render('admin/admindash', { pageTitle: 'Admin Dashboard' });
   } catch (error) {
-      console.error('Error rendering dashboard page:', error);
-      res.status(500).send('Internal Server Error');
+      
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(messages.COMMON.INTERNAL_ERROR);
   }
 };
 
 
 exports.getDashboardController = async (req, res) => {
   try {
-    const { filter } = req.query; // 'monthly', 'yearly', 'weekly', 'daily'
+    const { filter } = req.query; 
     const dateFilter = {};
 
-    // Set date filter based on user input
+    
     switch (filter) {
       case 'monthly':
         const startOfMonth = new Date(new Date().setDate(1));
@@ -45,37 +47,37 @@ exports.getDashboardController = async (req, res) => {
         dateFilter.createdAt = { $gte: startOfDay };
         break;
       default:
-        dateFilter.createdAt = { $gte: new Date(0) }; // default to 'yearly' filter
+        dateFilter.createdAt = { $gte: new Date(0) }; 
     }
 
-    // Get total sales, orders, and customers based on the date filter
+  
     const totalSales = await Order.aggregate([
-      // Unwind the items array to work with individual items
+    
       { $unwind: "$items" },
     
-      // Match only items with paymentStatus as "paid"
+    
       { $match: { "items.paymentStatus": "paid", ...dateFilter } },
     
-      // Group to sum up itemTotal for all paid items
+      
       {
         $group: {
           _id: null,
-          total: { $sum: "$items.itemTotal" }, // Sum of itemTotal for paid items
+          total: { $sum: "$items.itemTotal" }, 
         },
       },
     ]);
     
-    // Compute total orders where at least one item is paid
+    
     const totalOrders = await Order.countDocuments({
       ...dateFilter,
       "items.paymentStatus": "paid",
     });
     
     const totalCustomers = await User.countDocuments({
-      createdAt: dateFilter.createdAt || new Date(0), // apply the date filter directly
+      createdAt: dateFilter.createdAt || new Date(0), 
     });
 
-    // Best-selling products (based on order quantity)
+  
     const bestSellingProducts = await Product.aggregate([
       { $match: { productSold: { $gt: 0 } } },
       { $sort: { productSold: -1 } },
@@ -96,16 +98,16 @@ exports.getDashboardController = async (req, res) => {
     
 
     const bestSellingCategories = await Order.aggregate([
-      // Unwind the items array to work with individual items
+      
       { $unwind: "$items" },
     
-      // Match only items with paymentStatus as "paid"
+     
       { $match: { "items.paymentStatus": "paid" } },
     
-      // Lookup product details
+     
       {
         $lookup: {
-          from: "products", // Ensure your collection name for products is 'products'
+          from: "products", 
           localField: "items.productId",
           foreignField: "_id",
           as: "productDetails",
@@ -113,22 +115,21 @@ exports.getDashboardController = async (req, res) => {
       },
       { $unwind: "$productDetails" },
     
-      // Group by the category and calculate total revenue and total quantity sold
+     
       {
         $group: {
-          _id: "$productDetails.category", // Group by category
-          totalRevenue: { $sum: "$items.itemTotal" }, // Sum up the itemTotal
-          totalSold: { $sum: "$items.quantity" }, // Sum up the quantity sold
+          _id: "$productDetails.category", 
+          totalRevenue: { $sum: "$items.itemTotal" }, 
+          totalSold: { $sum: "$items.quantity" }, 
         },
       },
     
-      // Sort categories by total revenue in descending order
       { $sort: { totalRevenue: -1 } },
     
-      // Limit the result to top 10 categories
+      
       { $limit: 10 },
     
-      // Project the desired fields for response clarity
+      
       {
         $project: {
           category: "$_id",
@@ -138,7 +139,7 @@ exports.getDashboardController = async (req, res) => {
         },
       },
     ]);
-console.log("best selling categry", bestSellingCategories);
+
 
     res.json({
       bestSellingProducts,
@@ -149,7 +150,7 @@ console.log("best selling categry", bestSellingCategories);
       filter: filter || 'yearly',
     });
   } catch (error) {
-    console.error('Error in adminDashboardController:', error);
-    res.status(500).send('Internal Server Error');
+    
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(messages.COMMON.INTERNAL_ERROR);
   }
 };

@@ -20,8 +20,8 @@
             <!-- Search Option -->
             <div class="mb-4">
                 <form action="/admin/searchProduct" method="GET" class="flex">
-                    <input type="text" name="query" placeholder="Search Product" class="flex-grow px-4 py-2 rounded-l-lg text-black">
-                    <button type="submit" class="bg-blue-500 px-4 py-2 rounded-r-lg text-black">Search</button>
+                    <input type="text" name="query" placeholder="Search Product" class="flex-grow px-4 py-2 rounded-l-lg text-black" required>
+                    <button type="submit" class="bg-blue-500 px-4 py-2 rounded-r-lg text-white font-semibold hover:bg-blue-600 transition">Search</button>
                 </form>
             </div>
             <!--  addproduct  -->
@@ -75,15 +75,14 @@
             </table>
              <!-- Pagination -->
  <div class="flex justify-center mt-4 space-x-2">
-    <% if (currentPage > 1) { %>
-      <a href="/admin/Products?page=<%= currentPage - 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Previous</a>
+    <% if (currentPage > 1) { %>        <a href="/admin/Products?page=<%= currentPage - 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Previous</a>
     <% } %>
     <% for (let i = 1; i <= totalPages; i++) { %>
       <a href="/admin/Products?page=<%= i %>" class="px-4 py-2 rounded <%= i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black hover:bg-gray-400' %>"><%= i %></a>
     <% } %>
     <% if (currentPage < totalPages) { %>
       <a href="/admin/Products?page=<%= currentPage + 1 %>" class="bg-gray-300 text-black px-4 py-2 rounded hover:bg-gray-400">Next</a>
-    <% } %>
+   <% } %>
 
            
         </div>
@@ -125,19 +124,20 @@
                 }
             });
         }
-
-        <% if (message) { %>
-    const messageType = '<%= message.type %>';
-    const messageText = '<%= message.text %>';
-    const alertIcon = messageType === 'success' ? 'success' : 'error';
-
-    Swal.fire({
-        icon: alertIcon,
-        title: messageText,
-        showConfirmButton: true
-    });
-<% } %>
-
     </script>
+
+    <% if (typeof message !== 'undefined' && message) { %>
+    <script>
+        const messageType = '<%= message.type %>';
+        const messageText = '<%= message.text %>';
+        const alertIcon = messageType === 'success' ? 'success' : 'error';
+
+        Swal.fire({
+            icon: alertIcon,
+            title: messageText,
+            showConfirmButton: true
+        });
+    </script>
+    <% } %>
 </body>
 </html>

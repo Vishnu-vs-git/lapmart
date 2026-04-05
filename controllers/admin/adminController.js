@@ -1,6 +1,9 @@
 
 const User = require('../../model/userSchema')
 const Address=require('../../model/addressSchema')
+const messages = require('../../constants/messages')
+const USER_STATUS = require('../../constants/status')
+const STATUS_CODES = require('../../constants/statusCodes')
 
 
 exports.loadLogin = async (req,res) => {
@@ -15,22 +18,36 @@ exports.getDashboard=async(req,res) => {
   try{
     res.render("admin/adminDashboard")
   } catch (error) {
-    console.log("error in login",error);
+    console.log(error);
     
   }
 }
 
 exports.validateAdmin = async (req, res) => {
-  console.log('Attempting login with:', req.body.email, req.body.password);
-  
-  if (req.body.email === process.env.ADMIN_EMAIL && req.body.password === process.env.ADMIN_PASSWORD) {
-    req.session.admin = true; 
-    console.log('Admin session set:', req.session.admin); 
-    return res.redirect('/admin/dashboard');
-  } else {
-    console.log('Invalid credentials');
-    return res.render('admin/adminlogin', { error: 'Invalid email or password' });
+  const adminEmail = process.env.ADMIN_EMAIL.trim();
+  const adminPassword = process.env.ADMIN_PASSWORD.trim();
+
+  const inputEmail = req.body.email.trim();
+  const inputPassword = req.body.password.trim();
+
+  let error = "";
+
+  if (inputEmail !== adminEmail && inputPassword !== adminPassword) {
+    error = messages.AUTH.INVALID_BOTH;
+  } else if (inputEmail !== adminEmail) {
+    error = messages.AUTH.INVALID_EMAIL;
+  } else if (inputPassword !== adminPassword) {
+    error = messages.AUTH.INVALID_PASSWORD;
   }
+
+
+  if (error) {
+    return res.render('admin/adminlogin', { error });
+  }
+
+ 
+  req.session.admin = true;
+  return res.redirect('/admin/dashboard');
 };
 
 //-----------------to show customers.......//
@@ -52,10 +69,7 @@ customers.forEach(customer => {
 
 
   const startIndex=skip+1
-  console.log('startInddex',startIndex)
-     
-    // Fetch all users
-    console.log('my new customer',customers)
+  
     res.render('admin/adminCustomer',{customers,currentPage: page,
       totalPages: totalPages,startIndex }) 
   } catch (error) {
@@ -69,11 +83,11 @@ customers.forEach(customer => {
 exports.blockUser=async(req,res)=>{
   try{
     const userId=req.params.id;
-    await User.findByIdAndUpdate(userId,{isBlocked:true,status:'Inactive'});
+    await User.findByIdAndUpdate(userId,{isBlocked:true,status:USER_STATUS.INACTIVE});
     res.redirect('/admin/customers')
   }catch(error){
     console.log(error.message);
-    res.status(500).send('Error blocking user');
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(messages.USER.BLOCK_ERROR);
   }
 }
 
@@ -83,31 +97,27 @@ exports.blockUser=async(req,res)=>{
 exports.unBlockUser=async(req,res)=>{
   try{
     const userId=req.params.id;
-    await User.findByIdAndUpdate(userId,{isBlocked:false,status:'Active'});
+    await User.findByIdAndUpdate(userId,{isBlocked:false,status:USER_STATUS.ACTIVE});
       res.redirect('/admin/customers')
     
   }catch(error){
     console.log(error.message);
-    res.status(404).send('Error blocking user')
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(messages.USER.UNBLOCK_ERROR)
   }
 } 
-// Controller (adminController.js)
+
 exports.removeCustomer = async (req, res) => {
   try {
  
     const customerId = req.params.id;
     const user = await User.findByIdAndDelete(customerId);
 
-    
-
-
-
-    res.render('admin/adminCustomer',{ customers: await User.find(),message:{ text: 'Customer removed successfully', type: 'success' }});
+    res.render('admin/adminCustomer',{ customers: await User.find(),message:{ text: messages.USER.DELETE_SUCCESS, type: 'success' }});
   } catch (error) {
   
     console.error(error);
 
-    res.render('admin/adminCustomer',{ customers: await User.find(),message:{ text: 'something went wrong', type: 'error' }});
+    res.render('admin/adminCustomer',{ customers: await User.find(),message:{ text: messages.COMMON.INTERNAL_ERROR, type: 'error' }});
   }
 };
 

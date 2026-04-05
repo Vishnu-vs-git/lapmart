@@ -1,5 +1,7 @@
 const Product = require('../../model/productSchema');
-const Category=require('../../model/categorySchema')
+const Category=require('../../model/categorySchema');
+const messages = require('../../constants/messages');
+const STATUS_CODES = require('../../constants/statusCodes');
 const cloudinary = require('cloudinary').v2;
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -7,26 +9,21 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-  //------------->  here  calculate   the discounted price
+  
   const calculateDiscountedPrice = (price, discountType, discountValue) => {
     if (discountType === 'fixed') {
         return price - discountValue;
     } else if (discountType === 'percentage') {
         return price - (price * discountValue / 100);
     }
-    return price; //----------->it return price if no discount is calculated
+    return price; 
 };
 
 
-
-
-
-
-//....Listing of products...//
 exports.getProducts = async (req, res) => {
   try {
 
-    const page = parseInt(req.query.page) || 1; // Current page number
+    const page = parseInt(req.query.page) || 1; 
     const limit = 8; 
     const skip = (page - 1) * limit;
 
@@ -47,28 +44,24 @@ exports.getProducts = async (req, res) => {
     res.render('admin/adminProducts', { message: null, messageType: null, products, categories,currentPage: page,
       totalPages: totalPages,startIndex });
   } catch (error) {
-    console.log(error);
-    res.render('admin/adminProducts', { message: 'An error occurred. Please try again.', messageType: 'error', products: [],categories:[] });
+    res.render('admin/adminProducts', { message: messages.COMMON.INTERNAL_ERROR, messageType: 'error', products: [],categories:[] });
   }
 };
 
-//----adding---products----//
+
 exports.getAddproduct = async (req, res) => {
   try {
     const categories = await Category.find();
 
     res.render('admin/addProducts', { message: null, type: null,categories });
   } catch (error) {
-    console.error(error);
-    res.render('admin/addProducts', { message: 'An error occurred.',categories:[] });
+    res.render('admin/addProducts', { message: messages.COMMON.INTERNAL_ERROR,categories:[] });
   }
 };
 
-// ------postAddProducts....///
+
 exports.postAddProduct = async (req, res) => {
   let categories;
-  
-
 
   try {
    
@@ -100,44 +93,37 @@ exports.postAddProduct = async (req, res) => {
       
     const finalPrice = calculateDiscountedPrice(price, discountType, discountValue);
 
-  
     if (!color || color.length === 0) {
-      return res.render('admin/addProducts', { message: { text: 'Please add at least one color.', type: 'error' }, categories });
+      return res.render('admin/addProducts', { message: { text: messages.PRODUCT.COLOR_REQUIRED, type: 'error' }, categories });
     }
 
-    // ----------> Check if any field is empty
+  
     if (!name || !price || !quantity || !description) {
-      return res.render('admin/addProducts', { message: { text: 'All fields must be filled out.', type: 'error' }, categories });
+      return res.render('admin/addProducts', { message: { text: messages.PRODUCT.REQUIRED_FIELDS, type: 'error' }, categories });
     }
     
-    // ----- Validation for product name (whether it starts with an uppercase letter) -----
     if (name && !/^[A-Z]/.test(name)) {
-      return res.render('admin/addProducts', { message: { text: 'Product name must start with an uppercase letter.', type: 'error' }, categories });
+      return res.render('admin/addProducts', { message: { text: messages.PRODUCT.INVALID_NAME, type: 'error' }, categories });
     }
 
-    // --------> Validate color (should not contain numbers)
     if (color && /\d/.test(color)) {
-      return res.render('admin/addProducts', { message: { text: 'Color must be a string without numbers.', type: 'error' }, categories });
+      return res.render('admin/addProducts', { message: { text: messages.PRODUCT.INVALID_COLOR, type: 'error' }, categories });
     }
     
-
     if (!category) {
       return res.render('admin/addProducts', {
         categories,
-        message: { text: 'Please select a valid category.', type: 'error' }
+        message: { text: messages.PRODUCT.CATEGORY_REQUIRED, type: 'error' }
       });
     }
 
-    //--------->it Check if the category exists in the database
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return res.render('admin/addProducts', {
         categories,
-        message: { text: 'Selected category does not exist.', type: 'error' }
+        message: { text: messages.PRODUCT.CATEGORY_NOT_FOUND, type: 'error' }
       });
     }
-
-    //--------> Validate numeric fields (should not be negative)
     const numericFields = [
       { field: price, name: 'Product Price' },
       { field: quantity, name: 'Product Quantity' },
@@ -149,26 +135,23 @@ exports.postAddProduct = async (req, res) => {
 
     for (const { field, name } of numericFields) {
       if (field < 0) {
-        return res.render('admin/addProducts', { message: { text: 'Numberic error', type: 'error' }, categories });
+        return res.render('admin/addProducts', { message: { text: messages.PRODUCT.NUMERIC_ERROR, type: 'error' }, categories });
       }
     }
 
-    // --------> Validate operating system (should not be negative)
     if (operatingSystem < 0) {
-      return res.render('admin/addProducts', { message: { text: 'Operating System must be a positive integer.', type: 'error' }, categories });
+      return res.render('admin/addProducts', { message: { text: messages.PRODUCT.OS_INVALID, type: 'error' }, categories });
     }
 
-    // -------> Check if croppedImages is received and parse it
     const croppedImages = req.body.croppedImages ? JSON.parse(req.body.croppedImages) : [];
 
-    //------> Validate that at least 3 images are uploaded
     if (!croppedImages || croppedImages.length < 3) {
       return res.render('admin/addProducts', {
-        message: { text: 'At least 3 images are required', type: 'error'}, categories
+        message: { text: messages.PRODUCT.IMAGE_REQUIRED, type: 'error'}, categories
       });
     }
     const categoryForUpdation = await Category.findById(category);
-    // ------> Create new product
+   
     const newProduct = new Product({
       name,
       ramCapacity,
@@ -194,46 +177,33 @@ exports.postAddProduct = async (req, res) => {
       finalPrice
     });
 
-    // -----> Save the product to the database
     const savedProduct = await newProduct.save();
-//-------> Update the relevant category by pushing the product ID into the productIds array
 
-categoryForUpdation.productIds.push(savedProduct._id);  // Push the saved product's ID
+categoryForUpdation.productIds.push(savedProduct._id);  
 await categoryForUpdation.save();
 
-
-
     res.render('admin/addProducts', {
-      message: { text: 'Product added successfully', type: 'success' }, categories
+      message: { text: messages.PRODUCT.ADD_SUCCESS, type: 'success' }, categories
     });
   } catch (error) {
-    console.error(error);
     res.render('admin/addProducts', {
-      message: { text: 'Internal server error, please try again later', type: 'error' },
+      message: { text: messages.PRODUCT.ADD_ERROR, type: 'error' },
       categories
     });
   }
 };
-
-
-//------------->delete Product
 
 exports.deleteProduct =async(req,res)=>{
            const products=await Product.find();
     try{
       const productId=req.params.id;
       await Product.findByIdAndDelete(productId)
-      res.render('admin/adminProducts',{message:{text:'Product deleted Successfully',type:'success'},products})
+      res.render('admin/adminProducts',{message:{text:messages.PRODUCT.DELETE_SUCCESS,type:'success'},products})
     }catch(error){
-      console.error(error);
-      res.render('admin/adminProducts',{message:{text:'Product deletion Unsccessfull.Please try again later',type:'error'},products})
+      res.render('admin/adminProducts',{message:{text:messages.PRODUCT.DELETE_ERROR,type:'error'},products})
     }
 }
 
-
-
-
-// Block Product
 exports.blockProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -242,20 +212,20 @@ exports.blockProduct = async (req, res) => {
  
     const products = await Product.find();
     res.render('admin/adminProducts', {
-      message: { type: 'success', text: 'Product Blocked Successfully' },
+      message: { type: 'success', text: messages.PRODUCT.BLOCK_SUCCESS },
       products
     });
   } catch (error) {
-    console.error(error);
+
     const products = await Product.find();
     res.render('admin/adminProducts', {
-      message: { type: 'error', text: 'Something went wrong while blocking the product' },
+      message: { type: 'error', text: messages.PRODUCT.BLOCK_ERROR },
       products
     });
   }
 };
 
-// Unblock Product
+
 exports.unBlockProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -264,56 +234,48 @@ exports.unBlockProduct = async (req, res) => {
    
     const products = await Product.find();
     res.render('admin/adminProducts', {
-      message: { type: 'success', text: 'Product Unblocked Successfully' },
+      message: { type: 'success', text: messages.PRODUCT.UNBLOCK_SUCCESS},
       products
     });
   } catch (error) {
     console.error(error);
     const products = await Product.find();
     res.render('admin/adminProducts', {
-      message: { type: 'error', text: 'Something went wrong while unblocking the product' },
+      message: { type: 'error', text: messages.PRODUCT.UNBLOCK_ERROR },
       products
     });
   }
 };
 
-//----->getEDIT PRODUCT
+
 exports.getEditProduct = async (req, res) => {
   const categories=await Category.find()
   try {
       const productId = req.params.id;
       const product = await Product.findById(productId);
       if (!product) {
-          return res.status(404).send('Product not found');
+          return res.status(STATUS_CODES.NOT_FOUND).send(messages.PRODUCT.NOT_FOUND);
       }
       
       res.render('admin/editProduct', { product,message:null,categories });
   } catch (error) {
-      console.error('Error fetching product:', error);
-      res.status(500).send('Server error');
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(messages.COMMON.INTERNAL_ERROR);
   }
 };
-//------>remove image while editing
+
 exports.removeImage = async (req, res) => {
   const { image, productId } = req.body;
   try {
-    // Remove the image from the product's images array
+    
     await Product.findByIdAndUpdate(productId, { $pull: { images: image } });
-
-  
-    req.flash('success', 'Image removed successfully');
-
-
-    return res.status(200).json({ success: true, message: 'Image removed successfully' });
+    req.flash('success', messages.PRODUCT.IMAGE_REMOVE_SUCCESS);
+    return res.status(STATUS_CODES.OK).json({ success: true, message: messages.PRODUCT.IMAGE_REMOVE_SUCCESS });
   } catch (error) {
-    console.error('Error removing image:', error);
-
-
-    req.flash('error', 'Error removing image');
-    return res.status(500).json({ success: false, message: 'Error removing image' });
+    req.flash('error', messages.PRODUCT.IMAGE_REMOVE_ERROR);
+    return res.status(500).json({ success: false, message: messages.PRODUCT.IMAGE_REMOVE_ERROR });
   }
 };
-//------>post edit product
+
 exports.postEditProduct = async (req, res) => {
   try {
     const {
@@ -342,33 +304,33 @@ exports.postEditProduct = async (req, res) => {
     const finalPrice = calculateDiscountedPrice(price, discountType, discountValue);
   
     const categories = await Category.find();
-    const productId = req.params.id; // Get the product ID from params
+    const productId = req.params.id; 
     const product = await Product.findById(productId);
 
-    // Check for required fields and validation
+    
     if (!color || color.length === 0) {
-      return res.render('admin/editProduct', { product, categories, message: { text: 'Please add at least one color.', type: 'error' } });
+      return res.render('admin/editProduct', { product, categories, message: { text: messages.PRODUCT.COLOR_REQUIRED, type: 'error' } });
     }
 
     if (!name || !price || !quantity || !description||!isfeatured) {
-      return res.render('admin/editProduct', { product, categories, message: { text: 'All fields must be filled out.', type: 'error' } });
+      return res.render('admin/editProduct', { product, categories, message: { text: messages.PRODUCT.REQUIRED_FIELDS, type: 'error' } });
     }
 
     if (name && !/^[A-Z]/.test(name)) {
-      return res.render('admin/editProduct', { product, categories, message: { text: 'Product name must start with an uppercase letter.', type: 'error' } });
+      return res.render('admin/editProduct', { product, categories, message: { text: messages.PRODUCT.INVALID_NAME, type: 'error' } });
     }
 
     if (color && /\d/.test(color)) {
-      return res.render('admin/editProduct', { product, categories, message: { text: 'Color must be a string without numbers.', type: 'error' } });
+      return res.render('admin/editProduct', { product, categories, message: { text: messages.PRODUCT.INVALID_COLOR, type: 'error' } });
     }
     if (!category) {
-      return res.render('admin/editProduct', { product, categories, message: { text: 'Please select a valid category.', type: 'error' } });
+      return res.render('admin/editProduct', { product, categories, message: { text: messages.PRODUCT.CATEGORY_REQUIRED, type: 'error' } });
     }
 
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
       return res.render('admin/editProduct', {
-        message: { text: 'Selected category does not exist.', type: 'error' }
+        message: { text: messages.PRODUCT.CATEGORY_NOT_FOUND, type: 'error' }
       });
     }
 
@@ -388,13 +350,12 @@ exports.postEditProduct = async (req, res) => {
     }
 
     if (operatingSystem < 0) {
-      return res.render('admin/editProduct', { product, categories, message: { text: 'Operating System must be a positive integer.', type: 'error' } });
+      return res.render('admin/editProduct', { product, categories, message: { text: messages.PRODUCT.OS_INVALID, type: 'error' } });
     }
 
     const croppedImages = req.body.croppedImages ? JSON.parse(req.body.croppedImages) : [];
     const updatedImages = [...product.images, ...croppedImages];
 
-    // Find the existing product and update it
     await Product.findByIdAndUpdate(
       productId,
       {
@@ -423,17 +384,11 @@ exports.postEditProduct = async (req, res) => {
         finalPrice,
       }
     );
-
-
     const products = await Product.find();
-
-    return res.render('admin/adminProducts', { products, categories, message: { text: 'Product updated successfully ', type: 'success' } });
+    return res.render('admin/adminProducts', { products, categories, message: { text: messages.PRODUCT.UPDATE_SUCCESS, type: 'success' } });
   } catch (error) {
-    console.error(error);
-
-
     const products = await Product.find();
+    return res.render('admin/adminProducts', { products, categories, message: { text: messages.COMMON.INTERNAL_ERROR, type: 'error' } });
 
-    return res.render('admin/adminProducts', { products, categories, message: { text: 'Internal server error, please try again later', type: 'error' } });
   }
 };

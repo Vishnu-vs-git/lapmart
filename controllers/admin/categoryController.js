@@ -1,51 +1,55 @@
+const messages = require('../../constants/messages');
+const CATEGORY_STATUS = require('../../constants/status');
+const STATUS_CODES = require('../../constants/statusCodes');
 const Category=require('../../model/categorySchema');
 
-//---listingCAtegory---//
-exports.adminCategorylist=async(req,res)=>{
+
+exports.adminCategorylist= async (req,res) => {
   try{
     const categories= await Category.find()
     res.render('admin/adminCategory',{categories})
   }catch(error){
-    console.log(error)
     res.render('admin/adminCategory', { categories: [] })
   }
 }
 
 
-//--addingcategory--//
-exports.getAddCategory= async(req,res)=>{
+exports.getAddCategory= async (req,res)=>{
   try{
     res.render('admin/addCategory',{message:""})
   }catch(error){
-    console.log(error)
-  }
+    res.render('admin/addCategory', {
+    message:messages.COMMON.INTERNAL_ERROR,
+      type: "error"
+    }
+    )
+ 
 }
- //--postAddCategory--//
+}
+
  exports.postAddCategory = async (req, res) => {
   try {
     const { name } = req.body;
-
-    // Trim whitespace and validate name format
     const formattedName = name.trim();
     
     // --------->Check if the name starts with a capital letter and others are lowercase
     if (!/^([A-Z][a-z]*)(\s[A-Z][a-z]*)*$/.test(formattedName)) {
       return res.render('admin/addCategory', {
-        message: { text: 'Each word in the category name must start with a capital letter!', type: 'error' }
+        message: { text: messages.CATEGORY.INVALID_FORMAT, type: 'error' }
       });
     }
 
     // ------->Check if it starts with a number
     if (/^\d/.test(formattedName)) {
       return res.render('admin/addCategory', {
-        message: { text: 'Category name cannot start with a number!', type: 'error' }
+        message: { text: messages.CATEGORY.STARTS_WITH_NUMBER, type: 'error' }
       });
     }
 
     // -------->Check if it has more than 10 words
     if (formattedName.split(' ').length > 10) {
       return res.render('admin/addCategory', {
-        message: { text: 'Category name should not exceed 10 words!', type: 'error' }
+        message: { text: messages.CATEGORY.TOO_LONG, type: 'error' }
       });
     }
 
@@ -53,22 +57,20 @@ exports.getAddCategory= async(req,res)=>{
     const existingCategory = await Category.findOne({ name: formattedName });
     if (existingCategory) {
       return res.render('admin/addCategory', {
-        message: { text: 'Category already exists!', type: 'error' }
+        message: { text: messages.CATEGORY.EXISTS, type: 'error' }
       });
     }
 
     //--------> Add new category
     const newCategory = new Category({ name: formattedName });
     await newCategory.save();
-    const categories=await Category.find();
-    req.flash('success','category added successfully')
+    const categories = await Category.find();
+    req.flash('success',messages.CATEGORY.ADD_SUCCESS)
     res.redirect('/admin/categoryList')
-
    
   } catch (error) {
-    console.error("Error while adding category:", error);
     return res.render('admin/addCategory', {
-      message: { text: 'Error adding category!', type: 'error' }
+      message: { text: messages.CATEGORY.ADD_ERROR, type: 'error' }
     });
   }
 };
@@ -80,65 +82,59 @@ exports.getAddCategory= async(req,res)=>{
     const category= await Category.findById(categoryId);
    
     if(!category){
-      return res.render('admin/adminCategory',{message:'Category not found'})
+      return res.render('admin/adminCategory',{message:messages.CATEGORY.NOT_FOUND})
     }
     res.render('admin/editCategory',{category})
 
   }catch(error){
-    console.error('Error fetching category:',error);
-    res.render('admin/adminCategory',{message:'server error'})
+    res.render('admin/adminCategory',{message: messages.COMMON.INTERNAL_ERROR})
   }
  }
-// edit category----->post----
+
 exports.postEditCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
     let { name, status } = req.body;
 
-    // ------->it eliminates whitespace and validate name format
     const formattedName = name.trim();
     const category = await Category.findById(categoryId);
     
 
     if (!/^([A-Z][a-z]*)(\s[A-Z][a-z]*)*$/.test(formattedName)) {
       return res.render('admin/editCategory', {
-        message: { text: 'Each word in the category name must start with a capital letter!', type: 'error'},category
+        message: { text: messages.CATEGORY.INVALID_FORMAT, type: 'error'},category
       });
     }
 
     const existingCategory = await Category.findOne({ name: formattedName });
     if (existingCategory) {
       return res.render('admin/editCategory', {category,
-        message: { text: 'Category already exists!', type: 'error' }
+        message: { text: messages.CATEGORY.EXISTS, type: 'error' }
       });
     }
-    // -------> here Update the category
+   
     await Category.findByIdAndUpdate(categoryId, {
       name: formattedName,
-      status: status === 'on' ? 'Active' : 'Inactive'
+      status: status === 'on' ? CATEGORY_STATUS.ACTIVE : CATEGORY_STATUS.INACTIVE
     });
-     req.flash('success','category edited successfully')
+     req.flash('success',messages.CATEGORY.UPDATE_SUCCESS)
     res.redirect('/admin/categoryList');
   } catch (error) {
-    console.error('Error updating category', error);
-    res.status(500).send('Server error');
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(messages.CATEGORY.UPDATE_ERROR);
   }
 };
 
-
-//---> to blockCategory--//
 exports.blockAndUnblockcategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
     const action = req.params.action;
-    const newStatus = action === 'block' ? 'Inactive' : 'Active';
+    const newStatus = action === 'block' ? CATEGORY_STATUS.INACTIVE : CATEGORY_STATUS.ACTIVE;
     
     await Category.findByIdAndUpdate(categoryId, { status: newStatus });
     req.flash('success',`category ${action}ed successfully`)
     res.redirect('/admin/categoryList');
-  } catch (error) {
-    console.log(error);
-    res.status(500).send('An error occurred');
+  } catch (error) {  
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(messages.COMMON.INTERNAL_ERROR);
   }
 };
 exports.deletecategory =async(req,res)=>{
@@ -147,12 +143,11 @@ exports.deletecategory =async(req,res)=>{
    
     await Category.findByIdAndDelete(id);
     const categories=await Category.find()
-    req.flash('success','Category deleted successfully')
+    req.flash('success', messages.CATEGORY.DELETE_SUCCESS)
     res.redirect('/admin/categoryList')
 
-  }catch(error){
-    console.error('Error deleting category',error);
-    req.flash('error','Error deleting Category')
+  }catch(error){ 
+    req.flash('error', messages.CATEGORY.DELETE_ERROR)
     res.redirect('/admin/categoryList')
   
   }

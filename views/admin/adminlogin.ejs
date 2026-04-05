@@ -33,6 +33,11 @@
   <!-- Login Form -->
   <div class="login-box rounded-lg p-8 shadow-lg max-w-md w-full">
     <h2 class="text-white text-center text-2xl font-bold mb-6">ADMIN LOGIN</h2>
+    <% if (typeof error !== 'undefined' && error && (Array.isArray(error) ? error.length > 0 : true)) { %>
+      <div id="serverErrorMessage" class="bg-red-500 text-white p-2 rounded-lg mb-4 text-center">
+        <%= Array.isArray(error) ? error[0] : error %>
+      </div>
+    <% } %>
     <form id="adminLoginForm" action="/admin/login" method="POST">
       <div class="mb-4">
         <label for="email" class="block text-white">Enter Email</label>
@@ -57,12 +62,22 @@
     const password = document.getElementById('password');
     const emailError = document.getElementById('emailError');
     const passwordError = document.getElementById('passwordError');
+    const serverErrorMessage = document.getElementById('serverErrorMessage');
 
     // Email format validation using a simple regular expression
     function isValidEmail(email) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
     }
+
+    // Clear server error message on input
+    [email, password].forEach(input => {
+      input.addEventListener('input', () => {
+        if (serverErrorMessage) {
+          serverErrorMessage.style.display = 'none';
+        }
+      });
+    });
 
     // Main form validation logic
     form.addEventListener('submit', function(event) {

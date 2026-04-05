@@ -3,14 +3,16 @@ const Banner = require("../../model/bannerSchema");
 
 const cloudinary = require("../../services/cloudinary");
 const fs = require("fs");
+const STATUS_CODES = require("../../constants/statusCodes");
+const MESSAGES = require("../../constants/messages");
 
 exports.getAddBanner = async (req, res) => {
   try {
-    console.log("hello admin");
+   
     res.render("admin/adminAddBanner");
   } catch {
-    console.error("error in getting add banner page", error);
-    res.status(500).json({ error: "something error happened"} );
+    
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: MESSAGES.COMMON.INTERNAL_ERROR} );
   }
 };
 
@@ -19,13 +21,13 @@ exports.addBanner = async (req, res) => {
     const { title, description } = req.body;
 
     if (!req.file || !req.file.path) {
-      return res.status(404).json({ error: "No image file uploaded" });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ error: MESSAGES.BANNER.IMAGE_REQUIRED });
     }
 
     if (!title || !description) {
       return res
-        .status(404)
-        .json({ error: "Title and description is required." });
+        .status(STATUS_CODES.BAD_REQUEST)
+        .json({ error: MESSAGES.BANNER.VALIDATION_ERROR });
     }
 
     const newBanner = new Banner({
@@ -35,12 +37,12 @@ exports.addBanner = async (req, res) => {
     });
 
     await newBanner.save();
-    req.session.message="Banner added successfully"
+    req.session.message=MESSAGES.BANNER.ADD_SUCCESS;
       res.redirect('/admin/bannerList')
     // res.status(200).json({ message: "banner added successfully" });
   } catch (error) {
-    console.error("Error in adding banner", error);
-    res.status(500).json({ error: "error in adding banner" });
+  
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: MESSAGES.BANNER.ADD_ERROR });
   }
 };
 
@@ -61,13 +63,13 @@ exports.listBanner = async (req, res) => {
     const banners =await Banner.find().skip(skip).limit(limit)
 
     if (!banners) {
-      return res.status(404).json({ error: "banners not found" });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ error: messages.BANNER.NOT_FOUND });
     }
     res.render("admin/adminBanner", { banners, messages, currentPage: page,
       totalPages: Math.ceil(totalBanners / limit),});
   } catch (error) {
-    console.error("error in listing banner", error);
-    res.status(500).json({ error: "error in listing banner" });
+    
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: MESSAGES.BANNER.LIST_ERROR });
   }
 };
 
@@ -75,18 +77,18 @@ exports.deleteBanner=async(req,res)=>{
   try{
     const {id}=req.params;
     if(!id){
-      return res.status(404).json({error:"id not found"});
+      return res.status(STATUS_CODES.BAD_REQUEST).json({error:MESSAGES.COMMON.ID_MISSING});
 
     }
    const banner =await Banner.findByIdAndDelete(id);
    if(!banner){
-    return res.status(404).json({error:"banner  not found"});
+    return res.status(STATUS_CODES.NOT_FOUND).json({error:MESSAGES.BANNER.NOT_FOUND});
    }
-    res.status(200).json({success:"banner deleted successfully"})
+    res.status(STATUS_CODES.OK).json({success:MESSAGES.BANNER.DELETE_SUCCESS});
 
   }catch(error){
-    console.error('error in deleting banner')
-    res.status(500).json({error:'error in deleting message'})
+   
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({error:MESSAGES.BANNER.DELETE_ERROR})
   }
 }
 
@@ -98,22 +100,22 @@ exports.changeBannerStatus=async(req,res)=>{
     const{status}=req.body
   
     if(!id){
-      return res.status(400).json({error:"Id  is missing"})
+           return res.status(STATUS_CODES.BAD_REQUEST).json({error:MESSAGES.COMMON.ID_MISSING});
     }
     const validStatus=[true,false];
     if(!validStatus.includes(status)){
-      return res.status(400).json({error:'invalid status value'})
+      return res.status(STATUS_CODES.BAD_REQUEST).json({error:MESSAGES.BANNER.STATUS_VALUE_ERROR});
     }
     const banner=await Banner.findByIdAndUpdate(id,{status:status},{new:true});
 
     if(!banner){
-      return res.status(404).json({error:'banner not found'})
+      return res.status(STATUS_CODES.NOT_FOUND).json({error:MESSAGES.BANNER.NOT_FOUND});
     }
-    res.status(200).json({success:'Status changed successfully'})
+    res.status(STATUS_CODES.OK).json({success:MESSAGES.BANNER.STATUS_UPDATED})
 
   }catch(error){
-    console.error('An error occured while changing the banner Status',error);
-    res.status(500).json({error:'Error in changing the status'})
+
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({error:MESSAGES.BANNER.STATUS_ERROR});
   }
 }
 
@@ -123,8 +125,8 @@ exports.getBannerEditPage=async(req,res)=>{
     const banner=await Banner.findById(id);
    res.render('admin/adminEditBanner',{banner})
   }catch(error){
-      console.error('error in getting edit page',error);
-      res.status(500).json({error:"Error in getting edit page"})
+    
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({error:MESSAGES.BANNER.BANNER_EDIT_PAGE_ERROR});
   }
 }
 
@@ -132,18 +134,18 @@ exports.postEditBanner=async(req,res)=>{
   try{
  const{id}=req.params;
  if(!id){
-  return res.status(400).json({error:"id not found"});
+            return res.status(STATUS_CODES.BAD_REQUEST).json({error:MESSAGES.COMMON.ID_MISSING});
   
 }
 const { title, description } = req.body;
   if (!req.file || !req.file.path) {
-    return res.status(404).json({ error: "No image file uploaded" });
+    return res.status(STATUS_CODES.BAD_REQUEST).json({ error: MESSAGES.BANNER.IMAGE_REQUIRED });
   }
 
   if (!title || !description) {
     return res
-      .status(404)
-      .json({ error: "Title and description is required." });
+      .status(STATUS_CODES.BAD_REQUEST)
+      .json({ error: MESSAGES.BANNER.VALIDATION_ERROR });
   }
   const banner=await Banner.findByIdAndUpdate(id,{
      title:title,
@@ -152,13 +154,13 @@ const { title, description } = req.body;
 
   })
   if(!banner){
-   return  res.status(404).json({error:'Banner not found'})
+        return res.status(STATUS_CODES.NOT_FOUND).json({error:MESSAGES.BANNER.NOT_FOUND});
   }
-  res.status(200).json({success:'Banner edited successfully'})
+  res.status(STATUS_CODES.OK).json({success:MESSAGES.BANNER.EDIT_SUCCESS});
  
   }catch(error){
-    console.error('error in editing banner',error);
-    res.status(500).json({error:'internal server error'})
+   
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({error:MESSAGES.COMMON.INTERNAL_ERROR});
 
   }
 }

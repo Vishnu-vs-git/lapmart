@@ -1,3 +1,5 @@
+const messages = require("../../constants/messages");
+const STATUS_CODES = require("../../constants/statusCodes");
 const Coupon = require("../../model/couponSchema");
 
 exports.getCoupons = async (req, res) => {
@@ -7,18 +9,33 @@ exports.getCoupons = async (req, res) => {
    const coupons=await Coupon.find();
 
     res.render("admin/couponManagement", { coupons,message });
-  } catch (error) {}
-};
-///....................> Coupon add form rendering------>
+  } catch (error) {
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("admin/couponManagement", {
+      coupons: [],
+      message: {
+        text: messages.COUPON.COUPON_LOAD_ERROR,
+        type: "error"
+      }
+    });
+  }
+  }
+
+//....................> Coupon add form rendering------>
 exports.loadAddCoupon = async (req, res) => {
   try {
     res.render("admin/addCouponForm");
   } catch (error) {
-    console.error("error in loading form", error);
+    
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("admin/addCouponForm", {
+      message: {
+        text: messages.COUPON.FORM_LOAD_ERROR,
+        type: "error"
+      }
+    });
   }
 };
 
-//-------> adding coupons logic////
+//-------> adding coupons ---------->
 exports.postAddCoupon = async (req, res) => {
   try {
 
@@ -27,15 +44,14 @@ exports.postAddCoupon = async (req, res) => {
     
     const existingCoupon=await Coupon.findOne({code});
      if(existingCoupon){
-      return res.status(400).json({success:false,message:'Coupon code already exists. '})
+      return res.status(STATUS_CODES.BAD_REQUEST).json({success:false,message:messages.COUPON.EXISTS});
      }
 
      
      if (new Date(startDate) >= new Date(expiryDate)) {
-      return res.status(400).json({ success: false, message: "Start date must be before expiry date." });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: messages.COUPON.INVALID_DATE });
     }
 
-    console.log('req.body is:', req.body);      
     const coupon = new Coupon({
       code,
       couponType,
@@ -47,19 +63,15 @@ exports.postAddCoupon = async (req, res) => {
      
     });
 
-    console.log('Coupon is:', coupon);
-
-   
     await coupon.save();
-    res.json({ success: true, message: 'Coupon added successfully!' });
+    res.json({ success: true, message: messages.COUPON.ADD_SUCCESS });
   } catch (error) {
-    console.error('Error saving coupon:', error);
-    res.status(500).json({ success: false, message: 'Failed to add coupon.' });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: messages.COUPON.ADD_ERROR });
   }
 };
 
 
-//------>block and unblock customers
+//------>block and unblock coupons
 
 
 exports.blockCoupon= async (req, res) => {
@@ -68,21 +80,17 @@ exports.blockCoupon= async (req, res) => {
 
     const updatedCoupon = await Coupon.findByIdAndUpdate(
       couponId,
-      { isActive: false }, // Set isActive to false for blocking
+      { isActive: false }, 
       { new: true }
     );
 
-    console.log('updaredCoupon:',updatedCoupon)
-    
-    
     if (updatedCoupon) {
-      res.json({ success: true, message: 'Coupon blocked successfully!', isActive: updatedCoupon.isActive });
+      res.status(STATUS_CODES.OK).json({ success: true, message: messages.COUPON.BLOCK_SUCCESS, isActive: updatedCoupon.isActive });
     } else {
-      res.status(404).json({ success: false, message: 'Coupon not found.' });
+      res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: messages.COUPON.NOT_FOUND });
     }
   } catch (error) {
-    console.error('Error blocking coupon:', error);
-    res.status(500).json({ success: false, message: 'Server error while blocking coupon.' });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: messages.COMMON.INTERNAL_ERROR });
   }
 };
 
@@ -92,19 +100,18 @@ exports.UnblockCoupon= async (req, res) => {
     
     const updatedCoupon = await Coupon.findByIdAndUpdate(
       couponId,
-      { isActive: true }, // Set isActive to true for unblocking
+      { isActive: true },
       { new: true }
     );
-    console.log('updaredCoupon:in unblock',updatedCoupon)
+    
     
     if (updatedCoupon) {
-      res.json({ success: true, message: 'Coupon unblocked successfully!', isActive: updatedCoupon.isActive });
+      res.status(STATUS_CODES.OK).json({ success: true, message: messages.COUPON.UNBLOCK_SUCCESS, isActive: updatedCoupon.isActive });
     } else {
-      res.status(404).json({ success: false, message: 'Coupon not found.' });
+      res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: messages.COUPON.NOT_FOUND });
     }
   } catch (error) {
-    console.error('Error unblocking coupon:', error);
-    res.status(500).json({ success: false, message: 'Server error while unblocking coupon.' });
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: messages.COMMON.INTERNAL_ERROR });
   }
 };
 exports.removeCoupon=async(req,res)=>{
@@ -112,27 +119,35 @@ exports.removeCoupon=async(req,res)=>{
     const {couponId}=req.body;
     const coupon=await Coupon.findById(couponId);
     if(!coupon){
-      return res.status(404).json({success:false,message:'coupon not found'})
+      return res.status(STATUS_CODES.NOT_FOUND).json({success:false,message:messages.COUPON.NOT_FOUND});
     }
     await Coupon.findByIdAndDelete(couponId)
-    res.json({success:true,message:'coupon deleted successfully'})
-
-
+    return res.status(STATUS_CODES.OK).json({success:true,message:messages.COUPON.DELETE_SUCCESS});
 
   }catch(error){
-    console.error("Error in removing coupon",error)
-    res.status(500).json({success:false,message:'Internal server error'})
+    res.status(500).json({success:false,message: messages.COMMON.INTERNAL_ERROR})
   }
 }
 
 exports.getEditCoupon=async(req,res)=>{
   try{
       const couponId=req.params.id;
-      const coupon=await Coupon.findById(couponId);
+      if (!couponId) {
+        return res.status(STATUS_CODES.BAD_REQUEST).json({
+            success: false,
+            message: messages.COUPON.ID_REQUIRED,
+        });
+      }
+    const coupon=await Coupon.findById(couponId);
     res.render("admin/editCoupon",{coupon})
-  }catch(error){
-    console.error('error in getting page',error);
-    res.statsu(500).json({message:'error in getting edit coupon page'});
+  }catch(error){   
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).render("admin/editCoupon", {
+    coupon: null,
+    message: {
+      text: messages.COMMON.INTERNAL_ERROR,
+      type: "error"
+    }
+  });
   }
 }
 
@@ -140,7 +155,7 @@ exports.postEditCoupon=async(req,res)=>{
   try{
     const couponId=req.params.id;
     const{code,couponType,couponValue,minPurchaseAmount,startDate,expiryDate,totalUsageLimit}=req.body;
-    console.log('reqbody is',req.body)
+   
      const updatedcoupon= await Coupon.findByIdAndUpdate(couponId,{
       code,
       couponType,
@@ -150,16 +165,16 @@ exports.postEditCoupon=async(req,res)=>{
       expiryDate,
       totalUsageLimit
      },{new:true});
-     console.log('updated Coupon',updatedcoupon)
+     
       if(!updatedcoupon){
-        return res.status(404).json({success:true,message:'Error in updating coupon'})
+        return res.status(STATUS_CODES.NOT_FOUND).json({success:false,message: messages.COUPON.UPDATE_ERROR});
 
       }
-      req.session.message='coupon updated sucessfully'
+      req.session.message= messages.COUPON.UPDATE_SUCCESS;
       res.redirect("/admin/coupons")
   }catch(error){
-    console.error('Error in editing coupon',error);
-    res.status(500).json({message:'Error happened in updating coupon'})
+  
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({message:messages.COUPON.UPDATE_ERROR})
   }
 }
 

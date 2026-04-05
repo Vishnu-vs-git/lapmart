@@ -3,13 +3,18 @@ const moment=require('moment');
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const { Table } = require('pdfkit-table'); 
+const messages = require('../../constants/messages');
+const STATUS_CODES = require('../../constants/statusCodes');
+
+
+
 exports.getSalesReport = async (req, res) => {
     const { startDate, endDate, filter } = req.query;
 
     let filterDates = {};
     const now = new Date();
 
-    // Apply quick filters
+   
     if (filter === "day") {
         filterDates.startDate = new Date(now.setDate(now.getDate() - 1));
         filterDates.endDate = new Date();
@@ -25,12 +30,12 @@ exports.getSalesReport = async (req, res) => {
     }
 
     try {
-        // Aggregate sales report
+        
         const orders = await Order.aggregate([
-            // Unwind the items array
+         
             { $unwind: "$items" },
 
-            // Match only items with paymentStatus = "paid"
+         
             {
                 $match: {
                     "items.paymentStatus": "paid",
@@ -41,20 +46,20 @@ exports.getSalesReport = async (req, res) => {
                 },
             },
 
-            // Lookup product details for each item
+           
             {
                 $lookup: {
-                    from: "products", // Collection name in the database
+                    from: "products", 
                     localField: "items.productId",
                     foreignField: "_id",
                     as: "productDetails",
                 },
             },
 
-            // Unwind product details
+          
             { $unwind: "$productDetails" },
 
-            // Calculate total discount and other fields
+            
             {
                 $group: {
                     _id: "$_id",
@@ -66,27 +71,27 @@ exports.getSalesReport = async (req, res) => {
                     totalDiscount: {
                         $sum: {
                             $add: [
-                                { $subtract: ["$items.originalPrice", "$items.price"] }, // Per-item discount
-                                { $ifNull: ["$couponDiscount", 0] }, // Coupon discount
+                                { $subtract: ["$items.originalPrice", "$items.price"] }, 
+                                { $ifNull: ["$couponDiscount", 0] }, 
                             ],
                         },
                     },
-                    totalProductsSold: { $sum: "$items.quantity" }, // Total quantity sold
+                    totalProductsSold: { $sum: "$items.quantity" }, 
                     paymentMethod: { $first: "$paymentMethod" },
                 },
             },
 
-            // Sort results by creation date
+            
             { $sort: { createdAt: -1 } },
         ]);
 
-        // Calculate grand totals for the summary
+        
         const totalOrders = orders.length;
         const totalSalesAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
         const totalDiscount = orders.reduce((sum, order) => sum + order.totalDiscount, 0);
         const totalProductsSold = orders.reduce((sum, order) => sum + order.totalProductsSold, 0);
 
-        // Render the results to the sales report page
+       
         res.render("admin/salesReport", {
             orders,
             totalOrders,
@@ -97,8 +102,7 @@ exports.getSalesReport = async (req, res) => {
             endDate: filterDates.endDate?.toISOString().split("T")[0],
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
+          res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(messages.REPORT.LOAD_ERROR,);
     }
 };
 
@@ -108,7 +112,6 @@ exports.downloadSalesReportPDF = async (req, res) => {
     let filterDates = {};
     const now = new Date();
 
-    // Apply filters
     if (filter === "day") {
         filterDates.startDate = new Date(now.setDate(now.getDate() - 1));
         filterDates.endDate = new Date();
@@ -124,7 +127,7 @@ exports.downloadSalesReportPDF = async (req, res) => {
     }
 
     try {
-        // Fetch data from the database
+        
         const orders = await Order.aggregate([
             { $unwind: "$items" },
             {
@@ -159,13 +162,12 @@ exports.downloadSalesReportPDF = async (req, res) => {
             { $sort: { createdAt: -1 } },
         ]);
 
-        // Prepare summary data
+
         const totalOrders = orders.length;
         const totalSalesAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
         const totalDiscount = orders.reduce((sum, order) => sum + order.totalDiscount, 0);
         const totalProductsSold = orders.reduce((sum, order) => sum + order.totalProductsSold, 0);
 
-        // Generate PDF
         const doc = new PDFDocument({ margin: 30 });
         const filename = `Sales_Report_${Date.now()}.pdf`;
 
@@ -174,11 +176,9 @@ exports.downloadSalesReportPDF = async (req, res) => {
 
         doc.pipe(res);
 
-        // Title
         doc.fontSize(15).font('Helvetica-Bold').text('LapMart Sales Report', { align: 'center' });
         doc.moveDown(2);
 
-        // Summary
         doc.fontSize(14)
             .text(`Total Orders: ${totalOrders}`, { align: 'left' })
             .text(`Total Sales Amount: $${totalSalesAmount.toFixed(2)}`, { align: 'left' })
@@ -186,7 +186,6 @@ exports.downloadSalesReportPDF = async (req, res) => {
             .text(`Total Products Sold: ${totalProductsSold}`, { align: 'left' });
         doc.moveDown(2);
 
-        // Table Header
         const tableTop = doc.y;
         const itemX = 50;
 
@@ -199,7 +198,6 @@ exports.downloadSalesReportPDF = async (req, res) => {
             { label: 'Payment Method', width: 80 },
         ];
 
-        // Draw Header
         doc.fontSize(7).font('Helvetica-Bold');
         let colX = itemX;
 
@@ -208,12 +206,10 @@ exports.downloadSalesReportPDF = async (req, res) => {
             colX += header.width;
         });
 
-        // Draw a horizontal line below the header
         doc.moveTo(itemX, tableTop + 15)
             .lineTo(itemX + colX - itemX, tableTop + 15)
             .stroke();
 
-        // Draw Rows
         doc.font('Helvetica').fontSize(8);
         let rowY = tableTop + 25;
 
@@ -239,18 +235,16 @@ exports.downloadSalesReportPDF = async (req, res) => {
 
             rowY += 20;
 
-            // Check for page break
             if (rowY > doc.page.height - 50) {
                 doc.addPage();
-                rowY = 50; // Reset row position for new page
+                rowY = 50; 
             }
         });
-
-        // Finalize PDF
         doc.end();
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error generating PDF');
+      res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
+          messages.REPORT.PDF_ERROR
+  );
     }
 };
 
@@ -261,7 +255,6 @@ exports.downloadSalesReportExcel = async (req, res) => {
     let filterDates = {};
     const now = new Date();
 
-    // Apply filters
     if (filter === "day") {
         filterDates.startDate = new Date(now.setDate(now.getDate() - 1));
         filterDates.endDate = new Date();
@@ -277,7 +270,7 @@ exports.downloadSalesReportExcel = async (req, res) => {
     }
 
     try {
-        // Fetch data from the database
+       
         const orders = await Order.aggregate([
             { $unwind: "$items" },
             {
@@ -312,17 +305,16 @@ exports.downloadSalesReportExcel = async (req, res) => {
             { $sort: { createdAt: -1 } },
         ]);
 
-        // Prepare summary data
         const totalOrders = orders.length;
         const totalSalesAmount = orders.reduce((sum, order) => sum + order.totalAmount, 0);
         const totalDiscount = orders.reduce((sum, order) => sum + order.totalDiscount, 0);
         const totalProductsSold = orders.reduce((sum, order) => sum + order.totalProductsSold, 0);
 
-        // Create a new Excel workbook
+        
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('Sales Report');
 
-        // Set column headers
+       
         worksheet.columns = [
             { header: 'Order ID', key: 'orderId', width: 20 },
             { header: 'User ID', key: 'userId', width: 20 },
@@ -332,26 +324,25 @@ exports.downloadSalesReportExcel = async (req, res) => {
             { header: 'Payment Method', key: 'paymentMethod', width: 20 },
         ];
 
-        // Add "LapMart Sales Report" heading
+        
         worksheet.mergeCells('A1:F1');
         worksheet.getCell('A1').value = 'LapMart Sales Report';
         worksheet.getCell('A1').font = { bold: true, size: 16 };
         worksheet.getCell('A1').alignment = { horizontal: 'center' };
         worksheet.addRow([]); // Empty row
 
-        // Add summary information
+      
         worksheet.addRow([`Total Orders: ${totalOrders}`, '', '', '', '', '']);
         worksheet.addRow([`Total Sales Amount: $${totalSalesAmount.toFixed(2)}`, '', '', '', '', '']);
         worksheet.addRow([`Total Discount: $${totalDiscount.toFixed(2)}`, '', '', '', '', '']);
         worksheet.addRow([`Total Products Sold: ${totalProductsSold}`, '', '', '', '', '']);
-        worksheet.addRow([]); // Empty row to separate summary from the table
+        worksheet.addRow([]); 
 
-        // Add table header
+      
         worksheet.addRow([
             'Order ID', 'User ID', 'Date', 'Amount', 'Discount', 'Payment Method'
         ]);
 
-        // Add table rows for each order
         orders.forEach(order => {
             worksheet.addRow({
                 orderId: order.orderId,
@@ -363,7 +354,7 @@ exports.downloadSalesReportExcel = async (req, res) => {
             });
         });
 
-        // Apply table formatting (bold header, borders, center alignment)
+       
         worksheet.getRow(1).font = { bold: true };
         worksheet.getRow(1).alignment = { horizontal: 'center' };
         worksheet.getRow(1).border = {
@@ -384,19 +375,18 @@ exports.downloadSalesReportExcel = async (req, res) => {
             row.alignment = { horizontal: 'center' };
         });
 
-        // Set headers to be bold and centered
         worksheet.getRow(1).font = { bold: true };
         worksheet.columns.forEach(column => {
             column.alignment = { horizontal: 'center' };
         });
 
-        // Generate the Excel file and send it to the user
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', `attachment; filename="Sales_Report_${Date.now()}.xlsx"`);
         await workbook.xlsx.write(res);
         res.end();
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error generating Excel report');
+         res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).send(
+         messages.REPORT.EXCEL_ERROR
+  ) ;
     }
 };

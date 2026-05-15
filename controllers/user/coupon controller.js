@@ -1,6 +1,8 @@
 const Coupon=require('../../model/couponSchema')
 const User=require('../../model/userSchema')
-const Cart=require('../../model/cartSchema')
+const Cart=require('../../model/cartSchema');
+const messages = require('../../constants/messages');
+const STATUS_CODES = require('../../constants/statusCodes');
 
 
 
@@ -12,12 +14,15 @@ exports.getCoupon = async (req, res) => {
     const coupons = await Coupon.find({ isActive: true });
 
     if (!coupons || coupons.length === 0) {
-      return res.status(404).json({ message: 'No coupons found' });
+      
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: messages.COUPON.FETCH_EMPTY });
     }
-    res.json({ coupons }); // Always returns an array, even if it's just one coupon
+    return res.status(STATUS_CODES.OK).json({
+      success: true,
+      coupons
+    });
   } catch (error) {
-    console.error('An error occurred:', error);
-    res.status(500).send('Internal server error');
+     return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({success:false, message: messages.COMMON.INTERNAL_ERROR });
   }
 };
 
@@ -28,74 +33,62 @@ exports.applyCoupon= async (req, res) => {
     const { couponCode } = req.body;
     const userId = req.session.user._id; 
 
-    
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) {
-      return res.json({ success: false, message: 'Invalid coupon code.' });
+      
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: messages.COUPON.INVALID });
     }
     if (coupon.expiryDate < Date.now()) {
-      return res.json({ success: false, message: 'Coupon has expired.' });
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: messages.COUPON.EXPIRED });
     }
 
   
     const cart = await Cart.findOne({ userId }).populate('items.productId');
-    //----->here we find the usage count of particular user.
+   
     const userUsage = coupon.usageByUser.find((usage) => usage.userId.toString() === userId);
-
-    //----> here we check the usage of that coupon by particular user;
 
     if (userUsage && userUsage.count >= coupon.totalUsageLimit) {
      
-      return res.json({success:false,message:'You have reached the usage limit for this coupon.'})
+      return res.status(STATUS_CODES.BAD_REQUEST).json({success:false,message:messages.COUPON.USAGE_LIMIT_REACHED})
     };
  
-     //--- here we temporarilly storet the data into  session
-         req.session.appliedCoupon = couponCode;
-
-   
+  req.session.appliedCoupon = couponCode;
 
     let subTotal = 0;
     cart.items.forEach((item) => {
       subTotal += item.price* item.quantity;
-      console.log('itemquantity',item.quantity)
+      
     });
     
 
-    // Calculate the discount
+
     let discountAmount = 0;
-    if (coupon.couponType=== 'percentage') {
+    if (coupon.couponType=== messages.COUPON_TYPE.PERCENTAGE) {
       discountAmount = (coupon.couponValue / 100) * subTotal;
-    } else if (coupon.couponType === 'fixed') {
+    } else if (coupon.couponType === messages.COUPON_TYPE.FIXED) {
       discountAmount = coupon.couponValue;
     }
 
-    // Ensure discount does not exceed subtotal
     discountAmount = Math.min(discountAmount, subTotal);
     const discountedTotal = subTotal - discountAmount;
-    //  cart.grandTotal=discountedTotal;
+    
     let taxRate=.18;
     let newTax=Math.round(discountedTotal*.18);
-    console.log('discountedTotal',discountedTotal)
-
+  
     cart.tax=newTax
-    console.log('cart innnn apply tax',newTax)
-    console.log('cart innnn apply coupon',cart)
-    
      cart.couponDiscount=discountAmount;
      cart.grandTotal=discountedTotal+newTax
      await cart.save();
 
 
-    // Send back the discounted total and coupon details
     res.json({
       success: true,
-      message: 'Coupon applied successfully!',
+      message: messages.COUPON.APPLY_SUCCESS,
       discountedTotal: discountedTotal.toFixed(2),
       discountAmount: discountAmount.toFixed(2),
       couponCode: couponCode
     });
   } catch (error) {
-    console.error('Coupon application error:', error);
-    res.status(500).json({ success: false, message: 'Failed to apply coupon GHJHJ. Please try again.' });
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({success:false, message: messages.COUPON.APPLY_ERROR});
   }
 };

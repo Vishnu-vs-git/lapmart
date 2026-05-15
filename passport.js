@@ -25,7 +25,7 @@ passport.use(
             await user.save();
           }
           done(null, user);
-          console.log("User already exists, proceeding with login...");
+        
         } else {
           user = await User.create({
               googleId: profile.id,

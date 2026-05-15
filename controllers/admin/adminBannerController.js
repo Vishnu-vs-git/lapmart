@@ -39,7 +39,7 @@ exports.addBanner = async (req, res) => {
     await newBanner.save();
     req.session.message=MESSAGES.BANNER.ADD_SUCCESS;
       res.redirect('/admin/bannerList')
-    // res.status(200).json({ message: "banner added successfully" });
+    
   } catch (error) {
   
     res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ error: MESSAGES.BANNER.ADD_ERROR });

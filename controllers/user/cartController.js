@@ -1,3 +1,5 @@
+const messages = require('../../constants/messages');
+const STATUS_CODES = require('../../constants/statusCodes');
 const Cart = require('../../model/cartSchema');
 const Product = require('../../model/productSchema');
 
@@ -26,7 +28,7 @@ exports.getCartPage = async (req, res) => {
 
     let subtotal = 0;
     let totalDiscount = 0;
-    const taxRate = 0.18; // Example tax rate of 18%
+    const taxRate = 0.18; 
 
     cart.items.forEach(item => {
       const originalPrice = item.productId.price;
@@ -50,31 +52,34 @@ exports.getCartPage = async (req, res) => {
       message
     });
   } catch (error) {
-    console.error('Error retrieving cart:', error);
-    res.status(500).send('Error retrieving cart');
+     
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: messages.CART.CART_ERROR });
   }
 };
 
 exports.addToCart = async (req, res) => {
   const userId = req.session.user._id;
-  if (!userId) return res.status(401).json({ message: "User not authenticated" });
+
+  if (!userId) return res.status(STATUS_CODES.UNAUTHORIZED).json({ message: messages.AUTH.UNAUTHORIZED });
 
   const { productId, quantity } = req.body;
 
   try {
     if (!productId || !quantity) {
-      return res.status(400).json({ message: 'Product ID and quantity are required.' });
+      
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ message: messages.CART.ID_QUANTITY_ERROR });
     }
 
     const qty = parseInt(quantity, 10);
     const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ message: messages.PRODUCT.NOT_FOUND });
     }
 
     if (product.quantity < qty) {
-      return res.status(400).json({ message: 'Insufficient stock available' });
+     
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ message: messages.CART.INVALID_QUANTITY });
     }
 
     const price = product.finalPrice > 0 ? product.finalPrice : product.price;
@@ -116,10 +121,11 @@ exports.addToCart = async (req, res) => {
     cart.grandTotal = (cart.subTotal-cart.totalDiscount) + cart.tax;
 
     await cart.save();
-    return res.status(200).json({ message: 'Item added to cart successfully', cart });
+  
+    return res.status(STATUS_CODES.OK).json({ message: messages.CART.ADD_SUCCESS, cart });
   } catch (error) {
-    console.error("Error adding to cart:", error);
-    return res.status(500).json({ message: 'Something went wrong', error });
+    
+    return res.status(500).json({ message: messages.COMMON.INTERNAL_ERROR, error });
   }
 };
 
@@ -130,19 +136,21 @@ exports.updateQuantity = async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     if (!cart) {
-      return res.status(404).json({ success: false, message: 'Cart not found' });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: messages.CART.NOT_FOUND });
     }
-
+    
     const cartItem = cart.items.find(item => item._id.equals(itemId));
     if (!cartItem) {
-      return res.status(404).json({ success: false, message: 'Cart item not found' });
+      return res.status(STATUS_CODES.NOT_FOUND).json({ success: false, message: messages.CART.ITEM_NOT_FOUND });
+     
     }
 
     const product = cartItem.productId;
     const qty = parseInt(quantity, 10);
 
     if (qty <= 0 || qty > product.quantity||qty>5) {
-      return res.status(400).json({ success: false, message: 'Requested quantity not available' });
+     
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: messages.CART.INVALID_QUANTITY });
     }
 
     cartItem.quantity = qty;
@@ -164,8 +172,9 @@ exports.updateQuantity = async (req, res) => {
       productTotal: cartItem.total
     });
   } catch (error) {
-    console.error("Error updating quantity:", error);
-    res.status(500).json({ success: false, message: 'Failed to update quantity' });
+
+    
+    res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: messages.CART.UPDATE_ERROR });
   }
 };
 
@@ -182,7 +191,8 @@ exports.removeCartitems = async (req, res) => {
     ).populate('items.productId');
 
     if (!cart) {
-      return res.status(400).json({ success: false, message: 'Failed to remove item' });
+     
+      return res.status(STATUS_CODES.BAD_REQUEST).json({ success: false, message: messages.CART.REMOVE_ERROR });
     }
 
     cart.subTotal = cart.items.reduce((acc, item) => acc + item.quantity * item.originalPrice, 0);
@@ -194,7 +204,7 @@ exports.removeCartitems = async (req, res) => {
 
     return res.json({ success: true });
   } catch (error) {
-    console.error('Error removing item from cart:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    
+    return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({ success: false, message: messages.COMMON.INTERNAL_ERROR });
   }
 };

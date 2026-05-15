@@ -17,7 +17,8 @@ module.exports = {
     AUTH: {
     INVALID_EMAIL: "Email is invalid",
     INVALID_PASSWORD: "Password is incorrect",
-    INVALID_BOTH: "Email and password are invalid"
+    INVALID_BOTH: "Email and password are invalid",
+    UNAUTHORIZED: "User not authenticated"
   },
 
   USER: {
@@ -42,8 +43,18 @@ module.exports = {
     UPDATE_ERROR: "Error in updating coupon",
     COUPON_LOAD_ERROR:"Failed to load coupons",
     FORM_LOAD_ERROR:"Failed to load form",
-    ID_REQUIRED:"Coupon ID is required"
+    ID_REQUIRED:"Coupon ID is required",
+    INVALID: "Invalid coupon code",
+  EXPIRED: "Coupon has expired",
+  APPLY_SUCCESS: "Coupon applied successfully",
+  APPLY_ERROR: "Failed to apply coupon",
+  USAGE_LIMIT_REACHED: "You have reached the usage limit for this coupon",
+  FETCH_EMPTY: "No coupons found"
   },
+  COUPON_TYPE: {
+  PERCENTAGE: "percentage",
+  FIXED: "fixed"
+},
   OFFER: {
     LOAD_ERROR: "Failed to load offers",
     ADD_ERROR: "Error adding offer",
@@ -112,16 +123,56 @@ module.exports = {
     MISSING_FIELDS: "Missing required fields",
     STATUS_UPDATED: "Order status updated successfully",
     RETURN_ACCEPTED: "Return request accepted",
-    RETURN_REJECTED: "Return request rejected"
+    RETURN_REJECTED: "Return request rejected",
+    CREATE_ERROR: "Failed to create order",
+  CREATE_SUCCESS: "Order created successfully",
+  NOT_FOUND: "Order not found",
+  PAYMENT_FAILED: "Payment verification failed",
+  PAYMENT_SUCCESS: "Payment verified successfully"
   },
+  PAYMENT: {
+  PENDING: "Pending",
+  PAID: "paid"
+},
+ORDER_STATUS:{
+  PENDING: "pending",
+},
  REPORT: {
   LOAD_ERROR: "Error loading sales report",
   PDF_ERROR: "Error generating PDF report",
   EXCEL_ERROR: "Error generating Excel report"
 },
+PAYMENT_STATUS: {
+  PAID: "paid",
+  PENDING: "pending"
+},
 
   COMMON: {
-    INTERNAL_ERROR: "Something went wrong",
-    ID_MISSING: "ID is missing"
-  }
+   INTERNAL_ERROR: "Something went wrong",
+  NOT_FOUND: "Resource not found",
+  ADD_SUCCESS: "Added successfully",
+  ADD_ERROR: "Error while adding",
+  UPDATE_SUCCESS: "Updated successfully",
+  UPDATE_ERROR: "Error while updating",
+  DELETE_SUCCESS: "Deleted successfully",
+  DELETE_ERROR: "Error while deleting",
+  STATUS_UPDATED: "Status updated successfully",
+  STATUS_ERROR: "Error updating status",
+  INVALID_ID: "Invalid ID",
+  ID_MISSING: "ID is missing",
+  REQUIRED_FIELDS: "Required fields are missing"
+  },
+  CART: {
+  NOT_FOUND: "Cart not found",
+  ITEM_NOT_FOUND: "Cart item not found",
+  ADD_SUCCESS: "Item added to cart successfully",
+  ADD_ERROR: "Error adding item to cart",
+  UPDATE_SUCCESS: "Cart updated successfully",
+  UPDATE_ERROR: "Failed to update quantity",
+  REMOVE_SUCCESS: "Item removed successfully",
+  REMOVE_ERROR: "Failed to remove item",
+  INVALID_QUANTITY: "Requested quantity not available",
+  ID_QUANTITY_ERROR:"Product ID and quantity are required",
+  CART_ERROR:"Error retrieving cart"
+},
 };

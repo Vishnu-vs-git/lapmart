@@ -52,7 +52,7 @@
 
 1.  **Clone & Navigate**
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/Vishnu-vs-git/lapmart.git
     cd lapmart
     ```
 

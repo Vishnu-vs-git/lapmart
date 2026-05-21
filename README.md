@@ -89,6 +89,44 @@
     ```
 
 ---
+---
+
+## 📸 Screenshots
+
+### 🏠 Home Page
+Explore featured laptops, offers, and categories.
+![Home](./public/screenshots/home.png)
+
+---
+
+
+
+### 💻 Product Details
+Detailed specifications, images, and reviews.
+![Product Details](./public/screenshots/product-details.png)
+
+---
+
+### 🛒 Cart & Checkout
+Seamless cart management and secure checkout.
+![Cart](./public/screenshots/cart.png)
+
+---
+
+### 💳 Payment Integration
+Razorpay payment flow with wallet support.
+![Payment](./public/screenshots/payment.png)
+
+---
+
+### 📦 Orders & Tracking
+Track orders and download invoices.
+![Orders](./public/screenshots/orders.png)
+
+---
+
+
+
 
 ## 📁 Project Architecture
 

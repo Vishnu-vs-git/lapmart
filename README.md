@@ -95,7 +95,8 @@
 
 ### 🏠 Home Page
 Explore featured laptops, offers, and categories.
-![Home](./public/screenshots/home.png)
+<img width="1896" height="876" alt="lapmartHome" src="https://github.com/user-attachments/assets/492f0869-b6f3-494f-9ff7-b145ec8c6452" />
+
 
 ---
 
@@ -103,25 +104,30 @@ Explore featured laptops, offers, and categories.
 
 ### 💻 Product Details
 Detailed specifications, images, and reviews.
-![Product Details](./public/screenshots/product-details.png)
+<img width="1901" height="875" alt="productDetail" src="https://github.com/user-attachments/assets/d6beb3ad-2faa-45d9-b58d-f3e271c333e0" />
+
 
 ---
 
 ### 🛒 Cart & Checkout
 Seamless cart management and secure checkout.
-![Cart](./public/screenshots/cart.png)
+<img width="1907" height="852" alt="cart" src="https://github.com/user-attachments/assets/782f9d91-7353-4ada-8adf-57415895e1e4" />
+<img width="1907" height="842" alt="Checkout" src="https://github.com/user-attachments/assets/82439ce7-7f77-41e8-80ce-cd9607bcfbba" />
+
 
 ---
 
 ### 💳 Payment Integration
 Razorpay payment flow with wallet support.
-![Payment](./public/screenshots/payment.png)
+<img width="1890" height="857" alt="payment" src="https://github.com/user-attachments/assets/c3ea1eb6-cc04-44d1-8fe0-25aed76c15d7" />
+
 
 ---
 
 ### 📦 Orders & Tracking
 Track orders and download invoices.
-![Orders](./public/screenshots/orders.png)
+<img width="1902" height="862" alt="order" src="https://github.com/user-attachments/assets/5664eda9-a216-447f-a17b-422348940c70" />
+
 
 ---
 
